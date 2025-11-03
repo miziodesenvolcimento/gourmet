@@ -3134,8 +3134,8 @@ object fnfe: Tfnfe
       '  nrtreducao_ibs,'
       '  nrtcstibscbs'
       'FROM nrt where nrtcodigo=:nrtcodigo')
-    Left = 360
-    Top = 504
+    Left = 504
+    Top = 544
     ParamData = <
       item
         DataType = ftUnknown
@@ -3272,7 +3272,7 @@ object fnfe: Tfnfe
       '  valor_cbs'
       'from inr where itmchave=:itmchave')
     Left = 544
-    Top = 536
+    Top = 544
     ParamData = <
       item
         DataType = ftUnknown

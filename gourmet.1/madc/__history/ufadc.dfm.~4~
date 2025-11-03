@@ -1,38 +1,38 @@
 inherited fadc: Tfadc
   ActiveControl = adcidentificacao
   Caption = 'Administradora de Cart'#245'es '
-  ClientHeight = 651
+  ClientHeight = 428
   ClientWidth = 675
   ExplicitWidth = 691
-  ExplicitHeight = 690
+  ExplicitHeight = 467
   PixelsPerInch = 96
   TextHeight = 13
   inherited pbotoes: TPanel
-    Top = 622
+    Top = 399
     Width = 675
-    ExplicitTop = 399
-    ExplicitWidth = 675
+    ExplicitTop = 311
+    ExplicitWidth = 649
     inherited bconfirma: TBitBtn
       Left = 521
-      ExplicitLeft = 521
+      ExplicitLeft = 495
     end
     inherited bcancela: TBitBtn
       Left = 596
-      ExplicitLeft = 596
+      ExplicitLeft = 570
     end
     inherited bfechar: TBitBtn
       Left = 456
-      ExplicitLeft = 456
+      ExplicitLeft = 430
     end
   end
   inherited paginas: TPageControl
     Width = 675
-    Height = 622
-    ExplicitWidth = 675
-    ExplicitHeight = 399
+    Height = 399
+    ExplicitWidth = 649
+    ExplicitHeight = 311
     inherited Principal: TTabSheet
       ExplicitWidth = 667
-      ExplicitHeight = 594
+      ExplicitHeight = 371
       object Label1: TLabel
         Left = 8
         Top = 6
@@ -227,43 +227,21 @@ inherited fadc: Tfadc
       end
       object Button1: TButton
         Left = 168
-        Top = 249
+        Top = 256
         Width = 121
         Height = 25
         CustomHint = BalloonHint
         Caption = 'Regitrar Recebedor 1'
         TabOrder = 10
-        OnClick = Button1Click
       end
       object Button2: TButton
         Left = 295
-        Top = 249
+        Top = 256
         Width = 121
         Height = 25
         CustomHint = BalloonHint
         Caption = 'Regitrar Recebedor 2'
         TabOrder = 11
-        OnClick = Button2Click
-      end
-      object Button3: TButton
-        Left = 168
-        Top = 280
-        Width = 121
-        Height = 25
-        CustomHint = BalloonHint
-        Caption = 'Button3'
-        TabOrder = 12
-        OnClick = Button3Click
-      end
-      object Memo1: TMemo
-        Left = 168
-        Top = 328
-        Width = 377
-        Height = 201
-        CustomHint = BalloonHint
-        Lines.Strings = (
-          'Memo1')
-        TabOrder = 13
       end
     end
   end
@@ -414,21 +392,9 @@ inherited fadc: Tfadc
     Left = 584
     Top = 272
   end
-  inherited stg: TUniQuery
-    Left = 36
-    Top = 408
-  end
   inherited consultashema: TUniQuery
     Left = 484
     Top = 320
-  end
-  inherited stgid: TUniQuery
-    Left = 300
-    Top = 440
-  end
-  inherited cfgalterado: TUniQuery
-    Left = 508
-    Top = 464
   end
   object etd: TUniQuery
     SQL.Strings = (

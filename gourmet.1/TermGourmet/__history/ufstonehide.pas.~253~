@@ -713,9 +713,7 @@ begin
     while (vlTentativas<=3) do
     begin
       try
-        lRes := TRequest.New.BaseURL(Format('https://api.pagar.me/core/v5/orders/%s/closed', [lblidPagamento.Caption])).BasicAuthentication(Admin, '')
-                .ContentType('application/json')
-                .AddBody(lJson.Stringify)
+        lRes := TRequest.New.BaseURL(Format('https://api.pagar.me/core/v5/orders/%s/closed', [lblidPagamento.Caption])).BasicAuthentication(Admin, '').ContentType('application/json').AddBody(lJson.Stringify)
               .Patch;
 
         vlRequest:=true;

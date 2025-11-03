@@ -201,7 +201,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="C:\mizio\mdulos\mtcg.bpl" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="c:\mizio\modulos\mtcg.bpl" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>mtcg.bpl</RemoteName>
                         <Overwrite>true</Overwrite>
@@ -213,7 +213,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="c:\mizio\modulos\mtcg.bpl" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="C:\mizio\mdulos\mtcg.bpl" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>mtcg.bpl</RemoteName>
                         <Overwrite>true</Overwrite>

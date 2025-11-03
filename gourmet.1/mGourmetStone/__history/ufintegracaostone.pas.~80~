@@ -8,7 +8,7 @@ uses
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,upegabase,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,System.Math,
   Vcl.ExtCtrls, FireDAC.Comp.DataSet, FireDAC.Comp.Client, ufuncoes, Vcl.Grids,
-  Vcl.DBGrids, DASQLMonitor, UniSQLMonitor, UniProvider, MySQLUniProvider,
+  Vcl.DBGrids, DASQLMonitor, UniSQLMonitor, UniProvider, MySQLUniProvider, System.NetEncoding,
   inifiles, Vcl.StdCtrls, Vcl.ComCtrls;
 
 type
@@ -478,6 +478,15 @@ type
     dtlaiqrfichave: TIntegerField;
     dtlaiqdtlchave: TIntegerField;
     mesaiqorcchave: TIntegerField;
+    dtlaiqrdcnrauto: TStringField;
+    cancrpw: TUniQuery;
+    cancrpwrpwchave: TIntegerField;
+    cancrpwrpwtoken: TStringField;
+    cancrpwrpwmesa: TStringField;
+    cancrpwrpwstatus: TStringField;
+    cancrpworcchave: TIntegerField;
+    cancrpwcznchave: TIntegerField;
+    cancrpwrpwjson: TMemoField;
     procedure TimerPagamentoTimer(Sender: TObject);
     procedure trmstoneBeforeOpen(DataSet: TDataSet);
     procedure TimerRPWTimer(Sender: TObject);
@@ -546,6 +555,8 @@ type
     procedure ConectaBanco;
     procedure ajustaconexao;
     procedure AtualizaListaProcessaRecebimentos;
+    function ListarPendentesStone: boolean;
+    function retornaUltimoCaixaFechado: TDate;
 
     { Private declarations }
   public
@@ -568,6 +579,7 @@ type
     procedure ProcessaPagamentos(aOrcChave, aNumeroPedido, aIdPagamento: String);
     function recebimentoDireto(aOrcChave:String;aPedido:String;aMaquinaPOS:String; aValor:Double; aNome:string):string;
     function ExecutaCancelamentoStone(aIdPagamento: string; aOrcChave:string): boolean;
+    function CancelamentoStone(aIdPagamento: string): boolean;
 
 
   end;
@@ -1264,7 +1276,6 @@ begin
         lte.Append
       else
         lte.Edit;
-
 
       ltetfdcodigo.AsInteger := tfdVenda;
       lteltedata.AsDateTime := Now();
@@ -2166,6 +2177,8 @@ begin
   Result := false;
   vlPackNFCe := 0;
 
+  Acesso.Filial:=1;
+
   vlPackNFCe := LoadPackage('modulos\mnfegourmet.bpl');
 
   if vlPackNFCe <> 0 then
@@ -2433,6 +2446,8 @@ begin
 
   vpCznChave:=consulta.FieldByName('cznchave').AsInteger;
 
+
+
   if consulta.IsEmpty then
   begin
 
@@ -2440,10 +2455,18 @@ begin
     mprocessado.Lines.Clear;
 
     horario.Caption := 'Cozinha FECHADA';
+
+    if vpcontador>10 then
+    begin
+      ListarPendentesStone;
+      vpcontador:=0;
+    end
+    else
+    begin
+      vpcontador:=vpcontador+1;
+    end;
     exit;
   end;
-
-  mmlog.Lines.Add(Datetimetostr(now())+' '+'Cozinha aberta');
 
   verhorario.Close;
   verhorario.Connection := Conexao;
@@ -2464,7 +2487,7 @@ begin
     try
      mmlog.Lines.Add(Datetimetostr(now())+' linha 2465  '+'  vai atualizar lista');
 
-    AtualizaListaProcessaRecebimentos;
+     AtualizaListaProcessaRecebimentos;
 
     except
     on E: Exception do
@@ -2490,19 +2513,34 @@ begin
 
       while not mesaiq.Eof do
       begin
-
-        dtlaiq.Close;
-        dtlaiq.ParamByName('meschave').AsInteger:=mesaiqmeschave.AsInteger;
-        dtlaiq.Open;
-
-
-
-        if dtlaiqmdacodigo.AsInteger=7 then
-        begin
-          mmlog.Lines.Add(Datetimetostr(now())+' '+'Vai gerar nota da venda '+mesaiqmeschave.AsString+ ' vendas online-aiqfome');
-          GeraNFCe(mesaiqorcchave.asstring );
-
+        try
+          dtlaiq.Close;
+          dtlaiq.ParamByName('meschave').AsInteger:=mesaiqmeschave.AsInteger;
+          dtlaiq.Open;
+        except
+            on E: Exception do
+            begin
+              mmlog.Lines.Add(Datetimetostr(now())+' linha 2498 Erro emissão nfce '+e.Message);
+            end;
         end;
+
+
+        if (dtlaiqmdacodigo.AsInteger=7) then
+        begin
+          mmlog.Lines.Add(Datetimetostr(now())+' '+'Vai gerar nota da venda AIQUEFOME online '+mesaiqmeschave.AsString);
+          GeraNFCe(mesaiqorcchave.asstring );
+        end;
+
+        if ((dtlaiqmdacodigo.AsInteger=4) or
+           (dtlaiqmdacodigo.AsInteger=5)) and
+           (trim(dtlaiqrdcnrauto.AsString)<>'') and
+           (pos('{',dtlaiqrdcnrauto.AsString)=0) then
+        begin
+          mmlog.Lines.Add(Datetimetostr(now())+' '+'Vai gerar nota da venda '+dtlaiqmdaidentificacao.AsString +' '+ mesaiqmeschave.AsString);
+          GeraNFCe(mesaiqorcchave.asstring );
+        end;
+
+
 
         mesaiq.Next;
       end;
@@ -2527,126 +2565,133 @@ procedure Tfintegracaostone.AtualizaListaProcessaRecebimentos;
 var
   i:Integer;
 begin
-  i:=orcssai.RecNo;
-  orcssai.DisableControls;
-
-  orcssai.close;
-  orcssai.open;
-
-  orcssai.First;
-
-  mmlog.Lines.Add(Datetimetostr(now())+' '+'Verificando Pedidos');
-
-  mostra.Max:=orcssai.RecordCount;
-  mostra.Position:= 0;
+  try
 
 
-  while not orcssai.Eof do
-  begin
-    mostra.Position:= mostra.Position+1;
+    i:=orcssai.RecNo;
+    orcssai.DisableControls;
 
-    mmlog.Lines.Add(Datetimetostr(now())+' '+'Verificando Recebimento de Pedidos');
+    orcssai.close;
+    orcssai.open;
 
-    dtlrec.Close;
-    dtlrec.ParamByName('orcchave').AsInteger:=orcssaiorcchave.AsInteger;
-    dtlrec.ParamByName('flacodigo').AsInteger:=1;
-    dtlrec.Open;
+    orcssai.First;
 
-     mmlog.Lines.Add(Datetimetostr(now())+' '+'Código da Modalidade do Pedido '+orcssaiorcchave.AsString+' '+dtlrecmdacodigo.asstring);
+    mmlog.Lines.Add(Datetimetostr(now())+' '+'Verificando Pedidos');
 
-    if (dtlrecmdacodigo.AsInteger=4) or
-       (dtlrecmdacodigo.AsInteger=5) or
-       (dtlrecmdacodigo.AsInteger=6) then
+    mostra.Max:=orcssai.RecordCount;
+    mostra.Position:= 0;
+
+
+    while not orcssai.Eof do
     begin
+      mostra.Position:= mostra.Position+1;
 
+      mmlog.Lines.Add(Datetimetostr(now())+' '+'Verificando Recebimento de Pedidos');
 
-      rpworc.Close;
-      rpworc.ParamByName('orcchave').AsInteger:=orcssaiorcchave.AsInteger;
-      rpworc.Open;
+      dtlrec.Close;
+      dtlrec.ParamByName('orcchave').AsInteger:=orcssaiorcchave.AsInteger;
+      dtlrec.ParamByName('flacodigo').AsInteger:=1;
+      dtlrec.Open;
 
-      while not rpworc.Eof do
+       mmlog.Lines.Add(Datetimetostr(now())+' '+'Código da Modalidade do Pedido '+orcssaiorcchave.AsString+' '+dtlrecmdacodigo.asstring);
+
+      if (dtlrecmdacodigo.AsInteger=4) or
+         (dtlrecmdacodigo.AsInteger=5) or
+         (dtlrecmdacodigo.AsInteger=6) then
       begin
 
-        rpw.close;
-        rpw.ParamByName('orcchave').AsString:=orcssaiorcchave.AsString;
-        rpw.ParamByName('rpwstatus').AsString:='EM ABERTO';
-        rpw.ParamByName('cznchave').AsInteger:=rpworccznchave.AsInteger;
-        rpw.ParamByName('rpwtoken').AsString:=rpworcrpwtoken.AsString;
-        rpw.Open;
 
-        if not rpw.IsEmpty then
+        rpworc.Close;
+        rpworc.ParamByName('orcchave').AsInteger:=orcssaiorcchave.AsInteger;
+        rpworc.Open;
+
+        while not rpworc.Eof do
         begin
-          mmlog.Lines.Add(Datetimetostr(now())+' '+'Processando OrcChave: '+orcssaiorcchave.AsString+ ' Token: '+rpworcrpwtoken.AsString);
-          ProcessaRecebimentosStone;
+
+          rpw.close;
+          rpw.ParamByName('orcchave').AsString:=orcssaiorcchave.AsString;
+          rpw.ParamByName('rpwstatus').AsString:='EM ABERTO';
+          rpw.ParamByName('cznchave').AsInteger:=rpworccznchave.AsInteger;
+          rpw.ParamByName('rpwtoken').AsString:=rpworcrpwtoken.AsString;
+          rpw.Open;
+
+          if not rpw.IsEmpty then
+          begin
+            mmlog.Lines.Add(Datetimetostr(now())+' '+'Processando OrcChave: '+orcssaiorcchave.AsString+ ' Token: '+rpworcrpwtoken.AsString);
+            ProcessaRecebimentosStone;
+          end;
+
+          rpworc.Next;
         end;
 
-        rpworc.Next;
       end;
 
+      orcssai.Next;
     end;
 
-    orcssai.Next;
-  end;
 
 
+    mmlog.Lines.Add(Datetimetostr(now())+' '+'Verificando Online');
 
-  mmlog.Lines.Add(Datetimetostr(now())+' '+'Verificando Online');
-
-  mostra.Max:=orcssai.RecordCount;
-  mostra.Position:= 0;
+    mostra.Max:=orcssai.RecordCount;
+    mostra.Position:= 0;
 
 
-  while not orcssai.Eof do
-  begin
-
-    mostra.Position:= mostra.Position+1;
-
-    mmlog.Lines.Add(Datetimetostr(now())+' '+'Verificando Recebimento  online de Pedidos');
-
-    dtlrec.Close;
-    dtlrec.ParamByName('orcchave').AsInteger:=orcssaiorcchave.AsInteger;
-    dtlrec.ParamByName('flacodigo').AsInteger:=1;
-    dtlrec.Open;
-
-     mmlog.Lines.Add(Datetimetostr(now())+' '+'Código da Modalidade do Pedido '+orcssaiorcchave.AsString+' '+dtlrecmdacodigo.asstring);
-
-    if (dtlrecmdacodigo.AsInteger=78) then // online
+    while not orcssai.Eof do
     begin
 
-      mor.close;
-      mor.ParamByName('orcchave').AsString:=orcssaiorcchave.AsString;
-      mor.Open;
+      mostra.Position:= mostra.Position+1;
 
-      if not mor.IsEmpty then
+      mmlog.Lines.Add(Datetimetostr(now())+' '+'Verificando Recebimento  online de Pedidos');
+
+      dtlrec.Close;
+      dtlrec.ParamByName('orcchave').AsInteger:=orcssaiorcchave.AsInteger;
+      dtlrec.ParamByName('flacodigo').AsInteger:=1;
+      dtlrec.Open;
+
+       mmlog.Lines.Add(Datetimetostr(now())+' '+'Código da Modalidade do Pedido '+orcssaiorcchave.AsString+' '+dtlrecmdacodigo.asstring);
+
+      if (dtlrecmdacodigo.AsInteger=78) then // online
       begin
 
+        mor.close;
+        mor.ParamByName('orcchave').AsString:=orcssaiorcchave.AsString;
+        mor.Open;
 
-        mes.Close;
-        mes.ParamByName('meschave').AsString:=mor.FieldByName('meschave').AsString;
-        mes.FilterSQL:='mes.temcodigo=2';
-        mes.Open;
+        if not mor.IsEmpty then
+        begin
 
-        mmlog.Lines.Add(Datetimetostr(now())+' '+'  Vai emitir NFCe OrcChave: '+orcssaiorcchave.AsString);
 
-        GeraNFCe(orcssaiorcchave.AsString);
+          mes.Close;
+          mes.ParamByName('meschave').AsString:=mor.FieldByName('meschave').AsString;
+          mes.FilterSQL:='mes.temcodigo=2';
+          mes.Open;
 
-        mmlog.Lines.Add(Datetimetostr(now())+' '+'  Emitiu NFCe OrcChave: '+orcssaiorcchave.AsString);
+          mmlog.Lines.Add(Datetimetostr(now())+' '+'  Vai emitir NFCe OrcChave: '+orcssaiorcchave.AsString);
+
+          GeraNFCe(orcssaiorcchave.AsString);
+
+          mmlog.Lines.Add(Datetimetostr(now())+' '+'  Emitiu NFCe OrcChave: '+orcssaiorcchave.AsString);
+
+        end;
 
       end;
 
+      orcssai.Next;
     end;
 
-    orcssai.Next;
+    orcssai.RecNo:=i;
+
+    orcssai.RecNo:=i;
+    orcssai.EnableControls;
+
+  except
+  on E: Exception do
+    begin
+      mmlog.Lines.Add(Datetimetostr(now())+e.ClassName+' '+' linha 2654 '+e.Message);
+    end;
   end;
 
-  orcssai.RecNo:=i;
-
-
-
-
-
-  orcssai.RecNo:=i;
-  orcssai.EnableControls;
 
 end;
 
@@ -2841,6 +2886,195 @@ begin
 
 end;
 
+function Tfintegracaostone.retornaUltimoCaixaFechado: TDate;
+var
+  vlctadelivery: string;
+  qccx: TUniQuery;
+  vlDataUltimoCaixaFechado:TDate;
+
+begin
+  try
+    // identifica a conta de delivery para localizar o caixa
+    consulta.Close;
+    consulta.SQL.Text := 'select cfgmgouctadelivery from cfgmgou';
+    consulta.Open;
+    vlctadelivery := consulta.FieldByName('cfgmgouctadelivery').AsString;
+    // localiza ultimo caixa fechado do delivery
+    qccx := tuniquery.Create(application);
+    qccx.Close;
+    qccx.Connection := Conexao;
+    qccx.SQL.Text := 'select ccxchave, ccxdataber from ' + 'ccx where ctacodigo=' + vlctadelivery + ' and ccxfinal is not null order by ccxchave desc limit 1';
+    qccx.Open;
+    if qccx.IsEmpty then
+      vlDataUltimoCaixaFechado := IncDay(Now, +2)
+    else
+      vlDataUltimoCaixaFechado := qccx.FieldByName('ccxdataber').AsDateTime;
+    qccx.Close;
+    qccx.Free;
+    vlDataUltimoCaixaFechado := IncDay(vlDataUltimoCaixaFechado, +3);
+
+    result:=vlDataUltimoCaixaFechado;
+  Except
+    result := IncDay(Now, +3)
+  end;
+
+end;
+
+
+function Tfintegracaostone.ListarPendentesStone:boolean;
+var
+  lJson: TJson;
+  lRes: IResponse;
+  vlTentativas:Integer;
+  vlRequest:Boolean;
+  vlDataTresDiasAntes:Tdate;
+  vlDataUltimoCaixaFechado:Tdate;
+  sDe, sAte:String;
+  ListaPedidos:TJsonArray;
+  Pedido:TJsonObject;
+  Item: TJSONValue;
+  i:Integer;
+  a:String;
+begin
+  try
+
+    adc.Close;
+    adc.Connection:=Conexao;
+    adc.Open;
+    vpAdmin :=adc.FieldByName('adcchaveintegracao').asstring;
+
+    vlDataUltimoCaixaFechado:=retornaUltimoCaixaFechado;
+    vlDataTresDiasAntes:=IncDay(vlDataUltimoCaixaFechado, -5);
+
+     // Formato seguro para URL (AAAA-MM-DD)
+    sDe  := FormatDateTime('yyyy-mm-dd', vlDataTresDiasAntes);
+    sAte := FormatDateTime('yyyy-mm-dd', vlDataUltimoCaixaFechado);
+
+    lRes := TRequest.New.BaseURL(Format('https://api.pagar.me/core/v5/orders?'+
+                                        'status=%s&created_since=%s&created_until=%s',
+
+                                  [TNetEncoding.URL.Encode('pending'),
+                                  TNetEncoding.URL.Encode(sDe),
+                                  TNetEncoding.URL.Encode(sAte)
+
+                                  ]))
+                          .BasicAuthentication(vpAdmin,'')
+                          .ContentType('application/json')
+                         .Get;
+    vlRequest:=true;
+
+
+  except
+  on E: Exception do
+    begin
+      mmlog.Lines.Add('2929 ' +Datetimetostr(now())+' '+e.Message);
+      vlRequest:=False;
+      vlTentativas:=vlTentativas+1;
+      sleep(300);
+    end;
+
+  end;
+
+
+  if vlRequest then
+  begin
+
+    if (lRes.StatusCode = 200) and ((lRes.Content) <> '') then
+    begin
+      lJson := TJson.Create;
+      lJson.Parse(lRes.Content);
+
+
+      ListaPedidos:=TJsonArray.Create;
+      ListaPedidos:=lJson.Values['data'].AsArray;
+
+
+      for I:=0 to ListaPedidos.Count-1 do
+       begin
+          a:= ListaPedidos.Items[i].AsObject.Values['id'].AsString;
+          CancelamentoStone(a);
+
+       end;
+    end;
+
+  end;
+
+
+end;
+
+function Tfintegracaostone.CancelamentoStone(aIdPagamento:string):boolean;
+var
+  lJson: TJson;
+  lRes: IResponse;
+  vlTentativas:Integer;
+  vlRequest:Boolean;
+begin
+
+  adc.Close;
+  adc.Connection:=Conexao;
+  adc.Open;
+  vpAdmin :=adc.FieldByName('adcchaveintegracao').asstring;
+
+  lJson := TJson.Create;
+  try
+    lJson.Put('status', 'canceled');
+    vlTentativas:=0;
+    while (vlTentativas<=10) do
+    begin
+      try
+        lRes := TRequest.New.BaseURL(Format('https://api.pagar.me/core/v5/orders/%s/closed', [aIdPagamento]))
+                         .BasicAuthentication(vpAdmin, '')
+                         .ContentType('application/json')
+                         .AddBody(lJson.Stringify)
+                        .Patch;
+
+        vlRequest:=true;
+        break;
+
+      except
+        vlRequest:=False;
+        vlTentativas:=vlTentativas+1;
+        sleep(300);
+      end;
+    end;
+
+    if vlRequest then
+    begin
+      if (lRes.StatusCode = 200) and ((lRes.Content) <> '') then
+      begin
+
+        try
+
+          cancrpw.close;
+          cancrpw.ParamByName('rpwstatus').AsString:='EM ABERTO';
+          cancrpw.ParamByName('cznchave').AsInteger:=vpcznchave;
+          cancrpw.ParamByName('rpwtoken').AsString:=aIdPagamento;
+          cancrpw.Open;
+
+          if not cancrpw.IsEmpty then
+          begin
+            cancrpw.Edit;
+            cancrpwrpwtoken.AsString:=aIdPagamento;
+            cancrpwrpwstatus.AsString:='CANCELADO';
+            cancrpworcchave.AsString:='0';
+            cancrpw.Post;
+          end;
+
+
+        except
+          on E: Exception do
+          begin
+
+          end;
+        end;
+      end ;
+    end;
+  finally
+    lJson.Free;
+  end;
+end;
+
+
 
 function Tfintegracaostone.ExecutaCancelamentoStone(aIdPagamento:string; aOrcChave:string):boolean;
 var
@@ -2918,6 +3152,7 @@ begin
     lJson.Free;
   end;
 end;
+
 
 
 

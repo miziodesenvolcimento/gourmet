@@ -1183,12 +1183,12 @@ inherited fcfg: Tfcfg
     Top = 456
   end
   inherited stgid: TUniQuery
-    Left = 868
-    Top = 440
+    Left = 396
+    Top = 448
   end
   inherited cfgalterado: TUniQuery
-    Left = 764
-    Top = 488
+    Left = 340
+    Top = 432
   end
   object sen: TUniQuery
     SQL.Strings = (

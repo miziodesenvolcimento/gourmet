@@ -1159,7 +1159,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -1587,7 +1587,7 @@ object fcgt: Tfcgt
       ', IN pClbCodigo int'
       ', IN pChamada int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int)'
       'BEGIN'
       ''
@@ -3237,7 +3237,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -3673,7 +3673,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -5326,7 +5326,7 @@ object fcgt: Tfcgt
       ', IN pClbCodigo int'
       ', IN pChamada int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int)'
       'BEGIN'
       ''
@@ -5824,7 +5824,7 @@ object fcgt: Tfcgt
       ', IN pClbCodigo int'
       ', IN pChamada int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int)'
       'BEGIN'
       ''
@@ -6330,7 +6330,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -6766,7 +6766,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -9328,7 +9328,7 @@ object fcgt: Tfcgt
       ', IN pClbCodigo int'
       ', IN pChamada int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int)'
       'BEGIN'
       ''
@@ -9825,7 +9825,7 @@ object fcgt: Tfcgt
       ', IN pClbCodigo int'
       ', IN pChamada int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int)'
       'BEGIN'
       ''
@@ -10315,7 +10315,7 @@ object fcgt: Tfcgt
       ', IN pClbCodigo int'
       ', IN pChamada int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int)'
       'BEGIN'
       ''
@@ -10805,7 +10805,7 @@ object fcgt: Tfcgt
       ', IN pClbCodigo int'
       ', IN pChamada int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int)'
       'BEGIN'
       ''
@@ -11302,7 +11302,7 @@ object fcgt: Tfcgt
       ', IN pClbCodigo int'
       ', IN pChamada int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int)'
       'BEGIN'
       ''
@@ -11813,7 +11813,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -14381,7 +14381,7 @@ object fcgt: Tfcgt
       ', IN pClbCodigo int'
       ', IN pChamada int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int)'
       'BEGIN'
       ''
@@ -14889,7 +14889,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -16044,7 +16044,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -16482,7 +16482,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -20645,7 +20645,7 @@ object fcgt: Tfcgt
       ', IN pClbCodigo int'
       ', IN pChamada int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int)'
       'BEGIN'
       ''
@@ -21198,7 +21198,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -27432,7 +27432,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -28569,7 +28569,7 @@ object fcgt: Tfcgt
       ', IN pClbCodigo int'
       ', IN pChamada int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int)'
       'BEGIN'
       ''
@@ -29092,7 +29092,7 @@ object fcgt: Tfcgt
       ', IN pClbCodigo int'
       ', IN pChamada int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int)'
       'BEGIN'
       ''
@@ -29605,7 +29605,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -30700,7 +30700,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -31587,7 +31587,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -32585,7 +32585,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -34012,7 +34012,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -35787,7 +35787,7 @@ object fcgt: Tfcgt
       ', IN pTaxa double(16, 02)'
       ', IN pTipoFechamento int'
       ', OUT pConfirma int'
-      ', OUT pMensagem varchar(65000)'
+      ', OUT pMensagem BLOB'
       ', OUT pMesChave int'
       ', OUT pLteChave int)'
       'BEGIN'
@@ -37021,10 +37021,9 @@ object fcgt: Tfcgt
       '  csicodigo varchar(5) not null,'
       '  cspcodigo varchar(5) not null,'
       '  pis_aliquota numeric(10,3) not null,'
-      '  csFcodigo varchar(5) not null,'
+      '  csfcodigo varchar(5) not null,'
       '  cofins_aliquota numeric(10,3) not null,'
       '  nrtclassificacao_is varchar(50) not null,'
-      '  nrtclassificacao_ibscbs varchar(50) not null,'
       '  nrtclassificacao_cpresumido varchar(50) not null,'
       '  nrtibs_aliquota_estadual numeric(10,3) not null,'
       
@@ -37306,154 +37305,221 @@ object fcgt: Tfcgt
     SQL.Strings = (
       'CREATE TABLE IF NOT EXISTS inr ('
       
-        '    inrchave INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT' +
-        ' '#39'Chave prim'#225'ria do registro da tabela INR'#39','
+        '  inrregra int(11) NOT NULL AUTO_INCREMENT COMMENT '#39'Chave prim'#225'r' +
+        'ia da regra fiscal'#39','
       
-        '    itmchave INT(11) NOT NULL COMMENT '#39'Chave de refer'#234'ncia ao it' +
-        'em ou produto relacionado'#39','
+        '  itmchave int(11) NOT NULL COMMENT '#39'Referencia a chave do item ' +
+        'da venda da tabela itm'#39','
+      
+        '  cst_ibscbs varchar(5) DEFAULT NULL COMMENT '#39'Codigo da Situacao' +
+        'o Tribut'#225'ria (CST) do IBS e CBS'#39','
+      
+        '  class_trib_ibscbs varchar(10) DEFAULT NULL COMMENT '#39'Classifica' +
+        #231#227'o tributaria do IBS e CBS'#39','
+      
+        '  base_calc_ibscbs decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT ' +
+        #39'Base de calculo do IBS e CBS'#39','
+      
+        '  perc_ibs_uf decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT '#39'Perc' +
+        'entual IBS para UF de destino'#39','
+      
+        '  red_aliq_ibs_uf decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT '#39 +
+        'Reducao de al'#237'quota IBS UF destino'#39','
+      
+        '  aliq_efetiva_ibs_uf decimal(15, 2) NOT NULL DEFAULT 0.00 COMME' +
+        'NT '#39'Al'#237'quota efetiva IBS UF destino'#39','
+      
+        '  valor_ibs_uf decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT '#39'Val' +
+        'or IBS UF destino'#39','
+      
+        '  perc_ibs_mun decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT '#39'Per' +
+        'centual IBS municipal'#39','
+      
+        '  red_aliq_ibs_mun decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT ' +
+        #39'Reducaoo de al'#237'quota IBS municipal'#39','
+      
+        '  aliq_efetiva_ibs_mun decimal(15, 2) NOT NULL DEFAULT 0.00 COMM' +
+        'ENT '#39'Aliquota efetiva IBS municipal'#39','
+      
+        '  valor_ibs_mun decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT '#39'Va' +
+        'lor IBS municipal'#39','
+      
+        '  total_ibs_ufmun decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT '#39 +
+        'Valor total do IBS estadual mais o IBS municipal'#39','
+      
+        '  perc_cbs decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT '#39'Percent' +
+        'ual do CBS'#39','
+      
+        '  red_aliq_cbs decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT '#39'Red' +
+        'ucao de al'#237'quota do CBS'#39','
+      
+        '  aliq_efetiva_cbs decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT ' +
+        #39'Aliquota efetiva do CBS'#39','
+      
+        '  valor_cbs decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT '#39'Valor ' +
+        'do CBS'#39','
+      '  PRIMARY KEY (inrregra),'
+      '  INDEX idx_inr_cst (cst_ibscbs),'
+      '  INDEX idx_inr_id_item (itmchave),'
+      '  INDEX idx_inr_id_item_cst (itmchave, cst_ibscbs),'
+      '  CONSTRAINT inr_itm_itmchave FOREIGN KEY (itmchave)'
+      
+        '  REFERENCES itm (itmchave) ON DELETE RESTRICT ON UPDATE RESTRIC' +
+        'T'
+      ')'
+      'ENGINE = INNODB'
+      'AUTO_INCREMENT = 1'
+      'CHARACTER SET latin1'
+      'COLLATE latin1_swedish_ci'
+      
+        'COMMENT = '#39'Tabela de valores e parametros tributArios para IBS e' +
+        ' CBS com liga'#231'ao da tabela itm'#39';'
       ''
-      
-        '    inribscbscst VARCHAR(5) COMMENT '#39'C'#243'digo da Situa'#231#227'o Tribut'#225'r' +
-        'ia (CST) referente ao IBS'#39','
-      
-        '    inribscbscclasstrib VARCHAR(10) COMMENT '#39'Classifica'#231#227'o tribu' +
-        't'#225'ria espec'#237'fica para o IBS'#39','
       ''
-      
-        '    inribscbsvbc DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT '#39'Ba' +
-        'se de c'#225'lculo IBS (estadual)'#39','
-      
-        '    inribsufpibsuf DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT '#39 +
-        'Percentual IBS UF destino'#39','
-      
-        '    inribsufpredaliq DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT' +
-        ' '#39'Redu'#231#227'o de al'#237'quota IBS UF destino'#39','
-      
-        '    inribsufpaliqefet DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMEN' +
-        'T '#39'Al'#237'quota efetiva IBS UF destino'#39','
-      
-        '    inribsufvibsuf DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT '#39 +
-        'Valor IBS UF destino'#39','
-      ''
-      
-        '    inribsmunpibsmun DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT' +
-        ' '#39'Percentual IBS municipal'#39','
-      
-        '    inribsmunpredaliq DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMEN' +
-        'T '#39'Redu'#231#227'o de al'#237'quota IBS municipal'#39','
-      
-        '    inribsmunpaliqefet DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMME' +
-        'NT '#39'Al'#237'quota efetiva IBS municipal'#39','
-      
-        '    inribsmunvibsmun DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT' +
-        ' '#39'Valor IBS municipal'#39','
-      ''
-      
-        '    inrcbspcbs DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT '#39'Perc' +
-        'entual do CBS'#39','
-      
-        '    inrcbspredaliq DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT '#39 +
-        'Redu'#231#227'o de al'#237'quota do CBS'#39','
-      
-        '    inrcbspaliqefet DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT ' +
-        #39'Al'#237'quota efetiva do CBS'#39','
-      
-        '    inrcbsvcbs DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT '#39'Valo' +
-        'r do CBS'#39','
-      ''
-      
-        '    inrvibs DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT '#39'Valor t' +
-        'otal do IBS'#39
-      ') ENGINE=InnoDB'
-      
-        '  COMMENT='#39'Tabela de valores e par'#226'metros tribut'#225'rios para IBS e' +
-        ' CBS por item'#39';'
-      ''
-      '-- '#205'ndice principal de busca por item'
-      'CREATE INDEX idx_inr_itmchave ON inr (itmchave);'
       ''
       ''
       'CREATE TABLE IF NOT EXISTS mnr ('
       
-        '    mnrchave INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT' +
-        ' '#39'Chave prim'#225'ria da tabela MNR (identificador '#250'nico do registro)' +
-        #39','
+        '  mnrchave int(11) NOT NULL AUTO_INCREMENT COMMENT '#39'Chave primar' +
+        'ia do registro de totais'#39','
       
-        '    meschave INT(11) NOT NULL COMMENT '#39'Chave estrangeira que ref' +
-        'erencia o m'#234's ou per'#237'odo de apura'#231#227'o dos tributos'#39','
-      ''
+        '  meschave int(11) NOT NULL COMMENT '#39'Referencia a chave da venda' +
+        ' da tabela mes'#39','
       
-        '    totvbcibscbs DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT '#39'Va' +
-        'lor total da base de c'#225'lculo conjunta do IBS e CBS'#39','
-      '    '
-      '    -- IBS - UF de destino'
+        '  total_base_ibscbs decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT' +
+        ' '#39'Base de calculo conjunta para IBS e CBS'#39','
       
-        '    totgibsuftotvibsuf DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMME' +
-        'NT '#39'Total do IBS devido '#224' UF de destino (interestadual)'#39','
+        '  total_ibs_uf decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT '#39'Val' +
+        'or total do IBS destinado '#224' UF'#39','
       
-        '    totgibsuftotvdif DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT' +
-        ' '#39'Diferen'#231'a de valores de IBS interestadual (ajustes, compensa'#231#245 +
-        'es, etc.)'#39','
+        '  total_ibs_mun decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT '#39'Va' +
+        'lor total do IBS destinado ao municipio'#39','
       
-        '    totgibsuftotvdevtrib DECIMAL(15,2) NOT NULL DEFAULT 0.00 COM' +
-        'MENT '#39'Total de devolu'#231#245'es ou estornos tribut'#225'rios do IBS interes' +
-        'tadual'#39','
-      ''
-      '    -- IBS - Munic'#237'pio de destino'
+        '  total_ibs_ufmun decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT '#39 +
+        'Total do IBS estadual mais o IBS municipal'#39','
       
-        '    totgibsmuntotvibsmun DECIMAL(15,2) NOT NULL DEFAULT 0.00 COM' +
-        'MENT '#39'Total do IBS devido ao munic'#237'pio de destino'#39','
+        '  credito_presumido_ibs decimal(15, 2) NOT NULL DEFAULT 0.00 COM' +
+        'MENT '#39'Credito presumido de IBS'#39','
       
-        '    totgibsmuntotvdif DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMEN' +
-        'T '#39'Diferen'#231'a de valores de IBS municipal (ajustes, compensa'#231#245'es,' +
-        ' etc.)'#39','
+        '  total_cbs decimal(15, 2) NOT NULL DEFAULT 0.00 COMMENT '#39'Valor ' +
+        'total do CBS na opera'#231#227'o'#39','
       
-        '    totgibsmuntotvdevtrib DECIMAL(15,2) NOT NULL DEFAULT 0.00 CO' +
-        'MMENT '#39'Total de devolu'#231#245'es ou estornos tribut'#225'rios do IBS munici' +
-        'pal'#39','
-      ''
-      '    -- Totais consolidados IBS'
+        '  credito_presumido_cbs decimal(15, 2) NOT NULL DEFAULT 0.00 COM' +
+        'MENT '#39'Credito presumido de CBS'#39','
+      '  PRIMARY KEY (mnrchave),'
+      '  CONSTRAINT mnr_mes_meschave FOREIGN KEY (meschave)'
       
-        '    totvibs DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT '#39'Valor t' +
-        'otal consolidado de IBS (soma UF + Munic'#237'pio)'#39','
-      ''
-      '    -- Cr'#233'ditos presumidos IBS'
+        '  REFERENCES mes (meschave) ON DELETE RESTRICT ON UPDATE RESTRIC' +
+        'T'
+      ')'
+      'ENGINE = INNODB'
+      'AUTO_INCREMENT = 1'
+      'CHARACTER SET latin1'
+      'COLLATE latin1_swedish_ci'
       
-        '    totvcredpresibs DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT ' +
-        #39'Total de cr'#233'ditos presumidos de IBS no per'#237'odo'#39','
-      
-        '    totvcredprescondsusibs DECIMAL(15,2) NOT NULL DEFAULT 0.00 C' +
-        'OMMENT '#39'Cr'#233'ditos presumidos de IBS condicionados '#224' suspens'#227'o tri' +
-        'but'#225'ria'#39','
-      ''
-      '    -- Consolida'#231#227'o geral'
-      
-        '    totvdif DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT '#39'Total d' +
-        'e diferen'#231'as tribut'#225'rias (IBS e CBS)'#39','
-      
-        '    totvdevtrib DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT '#39'Val' +
-        'or total de devolu'#231#245'es tribut'#225'rias somadas (IBS + CBS)'#39','
-      ''
-      '    -- CBS (Contribui'#231#227'o sobre Bens e Servi'#231'os)'
-      
-        '    totvcbs DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT '#39'Valor t' +
-        'otal do CBS apurado no per'#237'odo'#39','
-      
-        '    totvcredprescbs DECIMAL(15,2) NOT NULL DEFAULT 0.00 COMMENT ' +
-        #39'Total de cr'#233'ditos presumidos de CBS no per'#237'odo'#39','
-      
-        '    totvcredprescondsuscbs DECIMAL(15,2) NOT NULL DEFAULT 0.00 C' +
-        'OMMENT '#39'Cr'#233'ditos presumidos de CBS condicionados '#224' suspens'#227'o tri' +
-        'but'#225'ria'#39
-      ') ENGINE=InnoDB'
-      
-        '  COMMENT='#39'Totais mensais de IBS e CBS apurados por per'#237'odo de m' +
-        'ovimenta'#231#227'o (mensal ou fiscal)'#39';'
-      ''
-      'CREATE INDEX idx_mnr_meschave ON mnr (meschave);'
-      ''
-      '')
+        'COMMENT = '#39'Tabela de totais consolidados de IBS e CBS com ligaca' +
+        'o'#160'da'#160'tabela'#160'mes'#39';')
     Left = 936
     Top = 480
+  end
+  object us001336: TUniScript
+    SQL.Strings = (
+      '-- Ajuste o delimitador para permitir BEGIN...END'
+      'DELIMITER //'
+      ''
+      'DROP PROCEDURE IF EXISTS AtualizaConstraint //'
+      ''
+      'CREATE PROCEDURE AtualizaConstraint()'
+      'BEGIN'
+      '  DECLARE v_fk_exists  INT DEFAULT 0;'
+      '  DECLARE v_idx_exists INT DEFAULT 0;'
+      '  DECLARE v_schema     VARCHAR(64);'
+      ''
+      '  SET v_schema = DATABASE();'
+      ''
+      
+        '  /* Verifica se a FK '#39'pro_nrt'#39' j'#225' existe na tabela '#39'pro'#39' refere' +
+        'nciando '#39'nrt(nrtcodigo)'#39' */'
+      '  SELECT COUNT(*)'
+      '    INTO v_fk_exists'
+      '  FROM information_schema.KEY_COLUMN_USAGE k'
+      '  WHERE k.CONSTRAINT_SCHEMA = v_schema'
+      '    AND k.TABLE_NAME        = '#39'pro'#39
+      '    AND k.CONSTRAINT_NAME   = '#39'pro_nrt'#39
+      '    AND k.REFERENCED_TABLE_NAME = '#39'nrt'#39
+      '    AND k.COLUMN_NAME       = '#39'nrtcodigo'#39
+      '    AND k.REFERENCED_COLUMN_NAME = '#39'nrtcodigo'#39';'
+      ''
+      '  IF v_fk_exists = 0 THEN'
+      
+        '    /* Certifique-se de que as tabelas s'#227'o InnoDB e as colunas e' +
+        'xistem */'
+      '    ALTER TABLE `pro`'
+      '      ADD CONSTRAINT `pro_nrt`'
+      '      FOREIGN KEY (`nrtcodigo`)'
+      '      REFERENCES `nrt` (`nrtcodigo`)'
+      '      ON DELETE RESTRICT'
+      '      ON UPDATE RESTRICT;'
+      '  END IF;'
+      ''
+      
+        '  /* Verifica se o '#237'ndice '#39'mfisituacao'#39' j'#225' existe na tabela '#39'mfi' +
+        #39' */'
+      '  SELECT COUNT(*)'
+      '    INTO v_idx_exists'
+      '  FROM information_schema.STATISTICS s'
+      '  WHERE s.TABLE_SCHEMA = v_schema'
+      '    AND s.TABLE_NAME   = '#39'mfi'#39
+      '    AND s.INDEX_NAME   = '#39'mfisituacao'#39';'
+      ''
+      '  IF v_idx_exists = 0 THEN'
+      '    ALTER TABLE `mfi`'
+      '      ADD INDEX `mfisituacao` (`mfisituacao`);'
+      '  END IF;'
+      ''
+      'END //'
+      ''
+      '/* Executa a procedure */'
+      'CALL AtualizaConstraint() //'
+      ''
+      '/* (Opcional) remove a procedure ap'#243's uso */'
+      'DROP PROCEDURE IF EXISTS AtualizaConstraint //'
+      ''
+      '/* Volta o delimitador padr'#227'o */'
+      'DELIMITER ;')
+    Left = 512
+    Top = 520
+  end
+  object us001337: TUniScript
+    SQL.Strings = (
+      ''
+      'DROP PROCEDURE IF EXISTS AtualizaColunas//'
+      ''
+      'CREATE DEFINER = '#39'root'#39'@'#39'%'#39
+      'PROCEDURE AtualizaColunas ()'
+      'BEGIN'
+      ''
+      'IF  EXISTS (SELECT'
+      '        *'
+      '      FROM information_schema.COLUMNS'
+      '      WHERE TABLE_SCHEMA = DATABASE()'
+      '      AND TABLE_NAME = '#39'nrt'#39
+      '      AND column_name = '#39'nrtclassificacao_ibscbs'#39') THEN'
+      ''
+      ''
+      ''
+      '--'
+      '-- Alter table nrt'
+      '--'
+      'ALTER TABLE nrt'
+      '  DROP COLUMN nrtclassificacao_ibscbs;'
+      ''
+      'end if; '
+      ''
+      'END//'
+      ''
+      'CALL AtualizaColunas()//')
+    Left = 592
+    Top = 520
   end
 end

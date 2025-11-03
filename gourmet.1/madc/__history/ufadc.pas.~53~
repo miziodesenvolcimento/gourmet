@@ -118,8 +118,6 @@ var
  Antic : TJSONObject;
  var SS: TStringStream;
  a:String;
- gid:TGUID;
- Obj: TJSONObject;
 begin
  try
 
@@ -183,7 +181,7 @@ begin
     // demais campos do sócio
     Partner.AddPair('name', 'Sulani M B de Souza');
     Partner.AddPair('email', 'sulani@miziosistemas.com.br');
-    Partner.AddPair('document', '40542343134');
+    Partner.AddPair('document', '26224451990');
     Partner.AddPair('type', 'individual');
     Partner.AddPair('mother_name', 'Dozolina Bortolotto');
     Partner.AddPair('birthdate', '08/03/1967');
@@ -194,10 +192,10 @@ begin
     RegInfo.AddPair('managing_partners', Partners);
 
     // demais campos de register_information
-    RegInfo.AddPair('company_name', 'MIZIO DESENVOLVIMENTO DE SISTEMAS LTDA');
-    RegInfo.AddPair('trading_name', 'MIZIO DESENVOLVIMENTO DE SISTEMAS LTDA');
-    RegInfo.AddPair('email', 'sulani@miziosistemas.com.br');
-    RegInfo.AddPair('document', '77699131000133');
+    RegInfo.AddPair('company_name', 'Recebedor pessoa juridica 1');
+    RegInfo.AddPair('trading_name', 'Empresa LTDA');
+    RegInfo.AddPair('email', 'empresax@avengers.com');
+    RegInfo.AddPair('document', '70521521000170');
     RegInfo.AddPair('type', 'corporation');
     RegInfo.AddPair('site_url', 'http://www.miziosistemas.com.br');
     RegInfo.AddPair('annual_revenue','100000');
@@ -210,12 +208,12 @@ begin
     DefaultBank := TJSONObject.Create;
     DefaultBank.AddPair('holder_name', 'Sulani M b de Souza');
     DefaultBank.AddPair('holder_type', 'individual');
-    DefaultBank.AddPair('holder_document', '77699131000133');
-    DefaultBank.AddPair('bank', '748');
-    DefaultBank.AddPair('branch_number', '0812');
-    DefaultBank.AddPair('branch_check_digit', '');
-    DefaultBank.AddPair('account_number', '82963');
-    DefaultBank.AddPair('account_check_digit', '3');
+    DefaultBank.AddPair('holder_document', '26224451990');
+    DefaultBank.AddPair('bank', '341');
+    DefaultBank.AddPair('branch_number', '1234');
+    DefaultBank.AddPair('branch_check_digit', '6');
+    DefaultBank.AddPair('account_number', '12345');
+    DefaultBank.AddPair('account_check_digit', '6');
     DefaultBank.AddPair('type', 'checking');
     lJson.AddPair('default_bank_account', DefaultBank);
 
@@ -235,13 +233,12 @@ begin
     lJson.AddPair('automatic_anticipation_settings', Antic);
 
     // code
-    Obj := TJSONObject.Create;
-    gid:=TGUID.NewGuid();
 
-    lJson.AddPair('code',  're_'+gid.ToString);
+    lJson.AddPair('code', '00001');
+
 
     try
-     a:=lJson.ToJSON;
+
 
       SS := TStringStream.Create(lJson.ToJSON, TEncoding.UTF8);
 
@@ -290,9 +287,6 @@ var
  Antic : TJSONObject;
  var SS: TStringStream;
  a:String;
- Obj : TJSONObject;
- gid:TGUID;
-
 begin
  try
 
@@ -408,10 +402,8 @@ begin
     lJson.AddPair('automatic_anticipation_settings', Antic);
 
     // code
-    Obj := TJSONObject.Create;
-    gid:=TGUID.NewGuid();
 
-    lJson.AddPair('code', 're_'+gid.ToString);
+    lJson.AddPair('code', '00002');
 
 
    finally
@@ -467,8 +459,6 @@ begin
       lRes := TRequest.New.BaseURL('https://api.pagar.me/core/v5/recipients')
                           .BasicAuthentication(Admin,'')
                           .ContentType('application/json')
-                          .AddParam('page','1')
-                          .AddParam('size','10')
                           .Get;
 
       if (lRes.StatusCode = 200) and ((lRes.Content) <> '') then

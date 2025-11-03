@@ -3005,10 +3005,6 @@ Begin
             end;
 
 
-
-
-
-
             // IMPLEMENTAÇÃO DOS NOVOS IMPOSTOS IBS / CBS
 
             // Reforma Tributária
@@ -3421,8 +3417,8 @@ Begin
     end;
     }
 
-    // reforma tributaria
-// reforma tributaria
+      // reforma tributaria
+      // reforma tributaria
 
       if ((cfgcrtcodigo.AsInteger>=3) and (cfgcfgapuracaoicm.AsInteger=2) ) or  (cfgcfgmodonfe.AsInteger = 2) then
       begin

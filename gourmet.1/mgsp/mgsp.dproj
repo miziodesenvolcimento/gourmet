@@ -202,14 +202,14 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="$(BDS)\Redist\Win32\rtl270.ja" Configuration="Release" Class="DependencyPackageResource">
+                <DeployFile LocalName="$(BDS)\Redist\Win32\FireDACCommonDriver270.bpl" Configuration="Release" Class="DependencyPackage">
                     <Platform Name="Win32">
-                        <RemoteName>rtl270.ja</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="$(BDS)\Redist\Win32\FireDACCommonDriver270.bpl" Configuration="Release" Class="DependencyPackage">
+                <DeployFile LocalName="$(BDS)\Redist\Win32\dbrtl270.fr" Configuration="Release" Class="DependencyPackageResource">
                     <Platform Name="Win32">
+                        <RemoteName>dbrtl270.fr</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -705,9 +705,9 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="$(BDS)\Redist\Win32\dbrtl270.fr" Configuration="Release" Class="DependencyPackageResource">
+                <DeployFile LocalName="$(BDS)\Redist\Win32\rtl270.ja" Configuration="Release" Class="DependencyPackageResource">
                     <Platform Name="Win32">
-                        <RemoteName>dbrtl270.fr</RemoteName>
+                        <RemoteName>rtl270.ja</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

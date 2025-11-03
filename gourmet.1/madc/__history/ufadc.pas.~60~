@@ -197,7 +197,7 @@ begin
     RegInfo.AddPair('company_name', 'MIZIO DESENVOLVIMENTO DE SISTEMAS LTDA');
     RegInfo.AddPair('trading_name', 'MIZIO DESENVOLVIMENTO DE SISTEMAS LTDA');
     RegInfo.AddPair('email', 'sulani@miziosistemas.com.br');
-    RegInfo.AddPair('document', '77699131000133');
+    RegInfo.AddPair('document', '14477548000131');
     RegInfo.AddPair('type', 'corporation');
     RegInfo.AddPair('site_url', 'http://www.miziosistemas.com.br');
     RegInfo.AddPair('annual_revenue','100000');
@@ -210,7 +210,7 @@ begin
     DefaultBank := TJSONObject.Create;
     DefaultBank.AddPair('holder_name', 'Sulani M b de Souza');
     DefaultBank.AddPair('holder_type', 'individual');
-    DefaultBank.AddPair('holder_document', '77699131000133');
+    DefaultBank.AddPair('holder_document', '14477548000131');
     DefaultBank.AddPair('bank', '748');
     DefaultBank.AddPair('branch_number', '0812');
     DefaultBank.AddPair('branch_check_digit', '');
@@ -241,7 +241,7 @@ begin
     lJson.AddPair('code',  're_'+gid.ToString);
 
     try
-     a:=lJson.ToJSON;
+
 
       SS := TStringStream.Create(lJson.ToJSON, TEncoding.UTF8);
 

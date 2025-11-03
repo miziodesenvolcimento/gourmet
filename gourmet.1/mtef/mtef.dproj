@@ -254,14 +254,14 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="mgourmet.bpl" Configuration="Base" Class="DependencyPackage">
+                <DeployFile LocalName="$(BDS)\Redist\Win32\vcl250.bpl" Configuration="Base" Class="DependencyPackage">
                     <Platform Name="Win32">
-                        <Enabled>false</Enabled>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="$(BDS)\Redist\Win32\vcl250.bpl" Configuration="Base" Class="DependencyPackage">
+                <DeployFile LocalName="mgourmet.bpl" Configuration="Base" Class="DependencyPackage">
                     <Platform Name="Win32">
+                        <Enabled>false</Enabled>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

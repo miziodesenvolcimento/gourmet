@@ -526,8 +526,8 @@ object fintegracaostone: Tfintegracaostone
       '  orcchave,'
       '  cznchave,'
       '  rpwjson'
-      'FROM rpw where orcchave=:orcchave '
-      '  and rpwstatus=:rpwstatus'
+      'FROM rpw where orcchave=:orcchave'
+      '  and  rpwstatus=:rpwstatus'
       '  and cznchave=:cznchave '
       '  and rpwtoken=:rpwtoken')
     BeforeOpen = trmstoneBeforeOpen
@@ -2387,8 +2387,8 @@ object fintegracaostone: Tfintegracaostone
   object TimerRPW: TTimer
     Enabled = False
     OnTimer = TimerRPWTimer
-    Left = 153
-    Top = 29
+    Left = 369
+    Top = 5
   end
   object rpworc: TUniQuery
     SQL.Strings = (
@@ -2976,6 +2976,65 @@ object fintegracaostone: Tfintegracaostone
     object dtlaiqrdcnrauto: TStringField
       FieldName = 'rdcnrauto'
       Size = 200
+    end
+  end
+  object cancrpw: TUniQuery
+    Connection = Conexao
+    SQL.Strings = (
+      'SELECT'
+      '  rpwchave,'
+      '  rpwtoken,'
+      '  rpwmesa,'
+      '  rpwstatus,'
+      '  orcchave,'
+      '  cznchave,'
+      '  rpwjson'
+      'FROM rpw where '
+      '   rpwstatus=:rpwstatus'
+      '  and cznchave=:cznchave '
+      '  and rpwtoken=:rpwtoken')
+    Left = 112
+    Top = 296
+    ParamData = <
+      item
+        DataType = ftUnknown
+        Name = 'rpwstatus'
+        Value = nil
+      end
+      item
+        DataType = ftUnknown
+        Name = 'cznchave'
+        Value = nil
+      end
+      item
+        DataType = ftUnknown
+        Name = 'rpwtoken'
+        Value = nil
+      end>
+    object cancrpwrpwchave: TIntegerField
+      FieldName = 'rpwchave'
+    end
+    object cancrpwrpwtoken: TStringField
+      FieldName = 'rpwtoken'
+      Size = 250
+    end
+    object cancrpwrpwmesa: TStringField
+      FieldName = 'rpwmesa'
+      Size = 10
+    end
+    object cancrpwrpwstatus: TStringField
+      FieldName = 'rpwstatus'
+      Size = 30
+    end
+    object cancrpworcchave: TIntegerField
+      FieldName = 'orcchave'
+    end
+    object cancrpwcznchave: TIntegerField
+      FieldName = 'cznchave'
+    end
+    object cancrpwrpwjson: TMemoField
+      FieldName = 'rpwjson'
+      BlobType = ftMemo
     end
   end
 end

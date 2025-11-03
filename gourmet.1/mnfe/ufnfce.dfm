@@ -2281,8 +2281,8 @@ object fnfce: Tfnfce
       '  nrtreducao_ibs,'
       '  nrtcstibscbs'
       'FROM nrt where nrtcodigo=:nrtcodigo')
-    Left = 320
-    Top = 464
+    Left = 176
+    Top = 504
     ParamData = <
       item
         DataType = ftUnknown

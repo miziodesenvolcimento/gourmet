@@ -8,7 +8,7 @@ uses
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,upegabase,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,System.Math,
   Vcl.ExtCtrls, FireDAC.Comp.DataSet, FireDAC.Comp.Client, ufuncoes, Vcl.Grids,
-  Vcl.DBGrids, DASQLMonitor, UniSQLMonitor, UniProvider, MySQLUniProvider,
+  Vcl.DBGrids, DASQLMonitor, UniSQLMonitor, UniProvider, MySQLUniProvider, System.NetEncoding,
   inifiles, Vcl.StdCtrls, Vcl.ComCtrls;
 
 type
@@ -547,6 +547,8 @@ type
     procedure ConectaBanco;
     procedure ajustaconexao;
     procedure AtualizaListaProcessaRecebimentos;
+    function ListarPendentesStone: boolean;
+    function retornaUltimoCaixaFechado: TDate;
 
     { Private declarations }
   public
@@ -1265,7 +1267,6 @@ begin
         lte.Append
       else
         lte.Edit;
-
 
       ltetfdcodigo.AsInteger := tfdVenda;
       lteltedata.AsDateTime := Now();
@@ -2443,6 +2444,9 @@ begin
     mprocessado.Lines.Clear;
 
     horario.Caption := 'Cozinha FECHADA';
+
+    ListarPendentesStone;
+
     exit;
   end;
 
@@ -2864,6 +2868,118 @@ begin
 
 end;
 
+function Tfintegracaostone.retornaUltimoCaixaFechado: TDate;
+var
+  vlctadelivery: string;
+  qccx: TUniQuery;
+  vlDataUltimoCaixaFechado:TDate;
+
+begin
+  try
+    // identifica a conta de delivery para localizar o caixa
+    consulta.Close;
+    consulta.SQL.Text := 'select cfgmgouctadelivery from cfgmgou';
+    consulta.Open;
+    vlctadelivery := consulta.FieldByName('cfgmgouctadelivery').AsString;
+    // localiza ultimo caixa fechado do delivery
+    qccx := tuniquery.Create(application);
+    qccx.Close;
+    qccx.Connection := Conexao;
+    qccx.SQL.Text := 'select ccxchave, ccxdataber from ' + 'ccx where ctacodigo=' + vlctadelivery + ' and ccxfinal is not null order by ccxchave desc limit 1';
+    qccx.Open;
+    if qccx.IsEmpty then
+      vlDataUltimoCaixaFechado := IncDay(Now, +2)
+    else
+      vlDataUltimoCaixaFechado := qccx.FieldByName('ccxdataber').AsDateTime;
+    qccx.Close;
+    qccx.Free;
+    vlDataUltimoCaixaFechado := IncDay(vlDataUltimoCaixaFechado, +3);
+
+    result:=vlDataUltimoCaixaFechado;
+  Except
+    result := IncDay(Now, +3)
+  end;
+
+end;
+
+
+function Tfintegracaostone.ListarPendentesStone:boolean;
+var
+  lJson: TJson;
+  lRes: IResponse;
+  vlTentativas:Integer;
+  vlRequest:Boolean;
+  vlDataTresDiasAntes:Tdate;
+  vlDataUltimoCaixaFechado:Tdate;
+  sDe, sAte:String;
+  ListaPedidos:TJsonArray;
+
+  i:Integer;
+  a:String;
+begin
+  try
+
+    adc.Close;
+    adc.Connection:=Conexao;
+    adc.Open;
+    vpAdmin :=adc.FieldByName('adcchaveintegracao').asstring;
+
+    vlDataUltimoCaixaFechado:=retornaUltimoCaixaFechado;
+    vlDataTresDiasAntes:=IncDay(vlDataUltimoCaixaFechado, -5);
+
+     // Formato seguro para URL (AAAA-MM-DD)
+    sDe  := FormatDateTime('yyyy-mm-dd', vlDataTresDiasAntes);
+    sAte := FormatDateTime('yyyy-mm-dd', vlDataUltimoCaixaFechado);
+
+    lRes := TRequest.New.BaseURL(Format('https://api.pagar.me/core/v5/orders?'+
+                                        'status=%s&created_since=%s&created_until=%s',
+
+                                  [TNetEncoding.URL.Encode('pending'),
+                                  TNetEncoding.URL.Encode(sDe),
+                                  TNetEncoding.URL.Encode(sAte)
+
+                                  ]))
+                          .BasicAuthentication(vpAdmin,'')
+                          .ContentType('application/json')
+                         .Get;
+    vlRequest:=true;
+
+
+  except
+  on E: Exception do
+    begin
+      mmlog.Lines.Add('2929 ' +Datetimetostr(now())+' '+e.Message);
+      vlRequest:=False;
+      vlTentativas:=vlTentativas+1;
+      sleep(300);
+    end;
+
+  end;
+
+
+  if vlRequest then
+  begin
+
+    if (lRes.StatusCode = 200) and ((lRes.Content) <> '') then
+    begin
+      lJson := TJson.Create;
+      lJson.Parse(lRes.Content);
+
+
+      ListaPedidos:=TJsonArray.Create;
+      ListaPedidos:=lJson.Values['data'].AsArray;
+
+      for I := 0 to ListaPedidos.Count-1 do
+      begin
+
+      end;
+
+    end;
+  end;
+
+
+end;
+
 
 function Tfintegracaostone.ExecutaCancelamentoStone(aIdPagamento:string; aOrcChave:string):boolean;
 var
@@ -2941,6 +3057,7 @@ begin
     lJson.Free;
   end;
 end;
+
 
 
 

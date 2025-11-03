@@ -252,9 +252,8 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="$(BDS)\Redist\Win32\xmlrtl250.fr" Configuration="Release" Class="DependencyPackageResource">
+                <DeployFile LocalName="C:\componentes\acbr\Lib\Delphi\LibD25\ACBr_TCP.bpl" Configuration="Release" Class="DependencyPackage">
                     <Platform Name="Win32">
-                        <RemoteName>xmlrtl250.fr</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -275,15 +274,15 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="$(BDS)\Redist\Win32\vclie250.ja" Configuration="Release" Class="DependencyPackageResource">
-                    <Platform Name="Win32">
-                        <RemoteName>vclie250.ja</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
                 <DeployFile LocalName="$(BDS)\Redist\Win32\dbrtl250.de" Configuration="Release" Class="DependencyPackageResource">
                     <Platform Name="Win32">
                         <RemoteName>dbrtl250.de</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="$(BDS)\Redist\Win32\vclie250.ja" Configuration="Release" Class="DependencyPackageResource">
+                    <Platform Name="Win32">
+                        <RemoteName>vclie250.ja</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -557,8 +556,9 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="C:\componentes\acbr\Lib\Delphi\LibD25\ACBr_TCP.bpl" Configuration="Release" Class="DependencyPackage">
+                <DeployFile LocalName="$(BDS)\Redist\Win32\xmlrtl250.fr" Configuration="Release" Class="DependencyPackageResource">
                     <Platform Name="Win32">
+                        <RemoteName>xmlrtl250.fr</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

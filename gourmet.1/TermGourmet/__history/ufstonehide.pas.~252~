@@ -542,8 +542,11 @@ type
 
 
 Const
+
 //  BaseURL = 'https://stone.miziosistemas.com.br/';
   ServiceRefererName  = 'MIZIO';
+
+
   Admin = 'sk_13487ea425e34c648b56d084da2476e1'; // Kusao salao
 //  Admin = 'sk_5f9f9deaa6334a7b8adbc82ef6a06d85'; // Kusao entrega
 
@@ -713,9 +716,7 @@ begin
     while (vlTentativas<=3) do
     begin
       try
-        lRes := TRequest.New.BaseURL(Format('https://api.pagar.me/core/v5/orders/%s/closed', [lblidPagamento.Caption])).BasicAuthentication(Admin, '')
-                .ContentType('application/json')
-                .AddBody(lJson.Stringify)
+        lRes := TRequest.New.BaseURL(Format('https://api.pagar.me/core/v5/orders/%s/closed', [lblidPagamento.Caption])).BasicAuthentication(Admin, '').ContentType('application/json').AddBody(lJson.Stringify)
               .Patch;
 
         vlRequest:=true;

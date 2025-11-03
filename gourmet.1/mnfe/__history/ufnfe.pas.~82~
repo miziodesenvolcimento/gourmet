@@ -822,7 +822,9 @@ begin
     rnfGerarNFe:
       mEnviarNFe;
     rnfImprimirNFe:
+    begin
       mReimprimirNFe;
+    end;
     rnfGerarPDF:
       mGerarPDF;
     rnfEmail:
@@ -1022,14 +1024,17 @@ begin
 
         itm.Edit;
 
-        itmitmbpis.AsCurrency := (((itmitmvalor.AsCurrency * itmitmquantidade.AsFloat)+ itmitmfrete.AsCurrency) - itmitmdesconto.AsCurrency +
+        itmitmbpis.AsCurrency :=( (itmitmvalor.AsCurrency * itmitmquantidade.AsFloat)+itmitmfrete.AsCurrency )- (itmitmdesconto.AsCurrency +
           itmitmoutras.AsCurrency+itmitmicm.AsCurrency);
+
         itmitmpis.AsFloat := itmitmbpis.AsCurrency * (itmitmaliqpis.AsFloat / 100);
 
 
-        itmitmbcofins.AsCurrency := (((itmitmvalor.AsCurrency * itmitmquantidade.AsFloat)+itmitmfrete.AsCurrency ) - itmitmdesconto.AsCurrency + itmitmfrete.AsCurrency +
+        itmitmbcofins.AsCurrency := ((itmitmvalor.AsCurrency * itmitmquantidade.AsFloat)+itmitmfrete.AsCurrency )- (itmitmdesconto.AsCurrency +
           itmitmoutras.AsCurrency+itmitmicm.AsCurrency);
-        itmitmcofins.AsFloat := itmitmbcofins.AsCurrency * (itmitmaliqcofins.AsFloat / 100);
+
+        itmitmcofins.AsFloat := itmitmbcofins.AsCurrency  * (itmitmaliqcofins.AsFloat / 100);
+
 
         itm.post;
       end
@@ -1178,7 +1183,7 @@ begin
       if itmitmaliqpis.AsFloat > 0 then
       begin
 
-        itmitmbpis.AsCurrency := (((itmitmvalor.AsCurrency * itmitmquantidade.AsFloat)+itmitmfrete.AsCurrency)  - itmitmdesconto.AsCurrency +
+        itmitmbpis.AsCurrency :=((itmitmvalor.AsCurrency * itmitmquantidade.AsFloat)+itmitmfrete.AsCurrency )- (itmitmdesconto.AsCurrency +
           itmitmoutras.AsCurrency+itmitmicm.AsCurrency);
 
         itmitmpis.AsFloat := itmitmbpis.AsCurrency * (itmitmaliqpis.AsFloat / 100);
@@ -1193,10 +1198,11 @@ begin
       if itmitmaliqcofins.AsFloat > 0 then
       begin
 
-        itmitmbcofins.AsCurrency := (((itmitmvalor.AsCurrency * itmitmquantidade.AsFloat)+ itmitmfrete.AsCurrency) - itmitmdesconto.AsCurrency  +
+
+        itmitmbcofins.AsCurrency := ((itmitmvalor.AsCurrency * itmitmquantidade.AsFloat)+itmitmfrete.AsCurrency )- (itmitmdesconto.AsCurrency +
           itmitmoutras.AsCurrency+itmitmicm.AsCurrency);
 
-        itmitmcofins.AsFloat := itmitmbcofins.AsCurrency * (itmitmaliqcofins.AsFloat / 100);
+        itmitmcofins.AsFloat := itmitmbcofins.AsCurrency  * (itmitmaliqcofins.AsFloat / 100);
 
       end
       else
@@ -1685,12 +1691,14 @@ Begin
           begin
             vlTotalCartoes := vlTotalCartoes + dtldtlvalor.AsCurrency;
             tPag := fpCartaoDebito;
+            tpIntegra:=tiPagNaoIntegrado;
           end;
 
           if dtlmodalidade.AsInteger = mdaCartaoCredito then
           begin
             vlTotalCartoes := vlTotalCartoes + dtldtlvalor.AsCurrency;
             tPag := fpCartaoCredito;
+             tpIntegra:=tiPagNaoIntegrado;
           end;
 
           if dtlmodalidade.AsInteger = mdaConvenio then
@@ -1706,6 +1714,7 @@ Begin
           begin
             vlTotalPIX := vlTotalPIX + dtldtlvalor.AsCurrency;
             tPag := fpPagamentoInstantaneo;
+            tpIntegra:=tiPagNaoIntegrado;
           end;
 
           if dtlmodalidade.AsInteger = mdaOnline then
@@ -1847,10 +1856,16 @@ Begin
                 tPag := fpCheque;
 
               if dtlmodalidade.AsInteger = mdaCartaoDebito then
+              begin
                 tPag := fpCartaoDebito;
+                tpIntegra:=tiPagNaoIntegrado;
+              end;
 
               if dtlmodalidade.AsInteger = mdaCartaoCredito then
+              begin
                 tPag := fpCartaoCredito;
+                tpIntegra:=tiPagNaoIntegrado;
+              end;
 
               if dtlmodalidade.AsInteger = mdaConvenio then
                 tPag := fpCreditoLoja;
@@ -1864,6 +1879,7 @@ Begin
               if dtlmodalidade.AsInteger = mdaPIX then
               begin
                 vlTotalPIX := vlTotalPIX + dtldtlvalor.AsCurrency;
+                tpIntegra:=tiPagNaoIntegrado;
                 tPag := fpPagamentoInstantaneo;
               end;
 
@@ -2948,10 +2964,52 @@ Begin
 
             end;
 
+            if itmcspcodigo.AsString = '' then
+            begin
+              pis.CST := StrToCSTPIS(ok, formatfloat('00', 99));
+            end
+            else
+            begin
+
+              pis.CST := StrToCSTPIS(ok, formatfloat('00', itmcspcodigo.AsInteger));
+            end;
+
+            if cfgcrtcodigo.AsInteger = 3 then // não é simples nem mei
+            begin
+
+              pis.pPIS := itmitmaliqpis.AsFloat;
+
+              pis.vPIS := itmitmpis.AsCurrency;
+              pis.vBC := itmitmbpis.AsCurrency;
+
+              vltotpis := vltotpis + pis.vPIS;
+
+            end;
+            if itmcsfcodigo.AsString = '' then
+            begin
+              COFINS.CST := StrToCSTCOFINS(ok, formatfloat('00', 99));
+
+            end
+            else
+            begin
+              COFINS.CST := StrToCSTCOFINS(ok, formatfloat('00', itmcsfcodigo.AsInteger));
+            end;
+            if cfgcrtcodigo.AsInteger = 3 then // não é simples nem mei
+            begin
+              COFINS.pCOFINS := itmitmaliqcofins.AsFloat;
+
+              COFINS.vBC := itmitmbcofins.AsCurrency;
+              COFINS.vCOFINS := itmitmcofins.AsCurrency;
+
+              vltotcofins := vltotcofins + COFINS.vCOFINS;
+            end;
 
 
 
-// IMPLEMENTAÇÃO DOS NOVOS IMPOSTOS IBS / CBS
+
+
+
+            // IMPLEMENTAÇÃO DOS NOVOS IMPOSTOS IBS / CBS
 
             // Reforma Tributária
 
@@ -3142,67 +3200,6 @@ Begin
             End;
 
 
-          if itmcspcodigo.AsString = '' then
-          begin
-            pis.CST := StrToCSTPIS(ok, formatfloat('00', 99));
-          end
-          else
-          begin
-
-            pis.CST := StrToCSTPIS(ok, formatfloat('00', itmcspcodigo.AsInteger));
-          end;
-
-          if cfgcrtcodigo.AsInteger = 3 then // não é simples nem mei
-          begin
-
-            pis.pPIS := itmitmaliqpis.AsFloat;
-
-            if cfgcfgtoenotacomplementar.AsInteger = mestoecodigo.AsInteger then
-            begin
-              pis.vPIS := itmitmpis.AsCurrency;
-              pis.vBC := itmitmbpis.AsCurrency
-            end
-            else
-            begin
-              if itmitmaliqpis.AsFloat <> 0 then
-              begin
-                pis.vPIS := ((itmitmvalor.AsCurrency * itmitmquantidade.AsFloat) - itmitmdesconto.AsCurrency) * (itmitmaliqpis.AsFloat / 100);
-                pis.vBC := (itmitmvalor.AsCurrency * itmitmquantidade.AsFloat) - itmitmdesconto.AsCurrency;
-              end;
-            end;
-            vltotpis := vltotpis + pis.vPIS;
-
-          end;
-          if itmcsfcodigo.AsString = '' then
-          begin
-            COFINS.CST := StrToCSTCOFINS(ok, formatfloat('00', 99));
-
-          end
-          else
-          begin
-            COFINS.CST := StrToCSTCOFINS(ok, formatfloat('00', itmcsfcodigo.AsInteger));
-          end;
-          if cfgcrtcodigo.AsInteger = 3 then // não é simples nem mei
-          begin
-            COFINS.pCOFINS := itmitmaliqcofins.AsFloat;
-
-            if cfgcfgtoenotacomplementar.AsInteger = mestoecodigo.AsInteger then
-            begin
-              COFINS.vBC := itmitmbcofins.AsCurrency;
-              COFINS.vCOFINS := itmitmcofins.AsCurrency;
-            end
-            else
-            begin
-              if itmitmaliqcofins.AsFloat <> 0 then
-              begin
-                COFINS.vBC := (itmitmvalor.AsCurrency * itmitmquantidade.AsFloat) - itmitmdesconto.AsCurrency;
-                COFINS.vCOFINS := ((itmitmvalor.AsCurrency * itmitmquantidade.AsFloat) - itmitmdesconto.AsCurrency) *
-                  (itmitmaliqcofins.AsFloat / 100);
-              end;
-            end;
-
-            vltotcofins := vltotcofins + COFINS.vCOFINS;
-          end;
 
           { if cfgcfgcstpis.AsString <> '' then
             begin
@@ -5801,6 +5798,7 @@ Begin
 
   vpArquivoNFe := GeraNomeNFe(vpMesChave);
 
+
   If not FileExists(vpArquivoNFe) Then
   Begin
     if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (pos('c:\',cfgcfgservarqnfes.AsString)=0) then
@@ -5821,6 +5819,7 @@ Begin
     end;
 
   End;
+
 
   If FileExists(vpArquivoNFe) Then
   Begin
@@ -6054,18 +6053,7 @@ Var
 Begin
   try
     vpArquivoNFe := GeraNomeNFe(vpMesChave);
-    narq := vpArquivoNFe;
-
-
-    if FileExists(narq) then
-    begin
-
-      if not DirectoryExists(ExtractFilePath(vlNomeArquivo)) then
-        ForceDirectories(ExtractFilePath(vlNomeArquivo));
-
-      copyfile(pchar(vpArquivoNFe), pchar(vlNomeArquivo), False);
-
-    end;
+    showmessage(vpArquivoNFe);
 
     If not FileExists(vpArquivoNFe) Then
     Begin
@@ -6568,16 +6556,17 @@ begin
 
   vpArquivoNFe := GeraNomeNFe(vpMesChave);
 
+
+
   If not FileExists(vpArquivoNFe) Then
   Begin
     if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (pos('c:\',cfgcfgservarqnfes.AsString)=0) then
     begin
-
        vpArquivoNFe := BaixaXMLServidor(IPServidorArquivos, vpArquivoNFe);
-
     end;
-
   End;
+
+
 
   if vpArquivoXMLEvento = '' then
   begin

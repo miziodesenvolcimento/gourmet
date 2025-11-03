@@ -129,6 +129,7 @@ object fnfce: Tfnfce
       '  cfgmsai.cfgtoeintesubsprodpropria,'
       '  cfgmsai.cfgtoeforasubsprodpropria,'
       ''
+      ''
       '  /*Contas a Receber*/'
       '  cfgmcre.cfgviaassinar,'
       '  /*Emiss'#227'o NFe*/'
@@ -151,9 +152,9 @@ object fnfce: Tfnfce
       '  cfgmnfe.cfgversao,'
       '  cfgmnfe.cfgcestativo,'
       '  cfgcertificadoa1,'
-      
-        '  -- ATEN'#199#195'O: cfgmnfe.cfgobs1 estava duplicado no SELECT origina' +
-        'l'
+      '  cfgmnfe.cfgservarqnfes,'
+      ''
+      ''
       ''
       '  /*Email*/'
       '  cfgmnfe.cfgemailnfe,'
@@ -200,7 +201,6 @@ object fnfce: Tfnfce
       '  cfgmsai.cfgimpnfc1,'
       '  cfgmsai.cfgimpnfc2,'
       '  cfgmsai.cfgimpnfc3,'
-      '  cfgmsai.cfgservarqnfes,'
       '  cfg.cfgusanfc,'
       '  cfg.cfgusapdv,'
       '  ete.eteemail,'
@@ -274,10 +274,6 @@ object fnfce: Tfnfce
       AutoGenerateValue = arAutoInc
       FieldName = 'cfgcodigo'
       Required = True
-    end
-    object cfgcfgservarqnfes: TStringField
-      FieldName = 'cfgservarqnfes'
-      Size = 255
     end
     object cfgcfgnumecertif: TStringField
       FieldName = 'cfgnumecertif'
@@ -540,11 +536,6 @@ object fnfce: Tfnfce
       ReadOnly = True
       Size = 3
     end
-    object cfgcfgmensagempdv_1: TStringField
-      FieldName = 'cfgmensagempdv_1'
-      ReadOnly = True
-      Size = 50
-    end
     object cfgcfgtrmimpfis1: TIntegerField
       FieldName = 'cfgtrmimpfis1'
       ReadOnly = True
@@ -589,6 +580,10 @@ object fnfce: Tfnfce
       FieldName = 'cfgimpnfc3'
       ReadOnly = True
       Required = True
+    end
+    object cfgcfgservarqnfes: TStringField
+      FieldName = 'cfgservarqnfes'
+      Size = 200
     end
   end
   object trm: TUniQuery
@@ -1324,9 +1319,7 @@ object fnfce: Tfnfce
       '  rec.recdthorasaida,'
       '  recmanual'
       'FROM rec'
-      
-        'WHERE (IFNULL(rec.recdthorasaida, '#39#39') = '#39#39') OR (rec.recdthorasai' +
-        'da='#39'1899-12-30 00:00:00'#39')'
+      'WHERE (IFNULL(rec.recdthorasaida, '#39#39') = '#39#39') '
       'ORDER BY reccodigo DESC LIMIT 1;')
     Left = 15
     Top = 40
@@ -2278,7 +2271,6 @@ object fnfce: Tfnfce
       '  csFcodigo,'
       '  cofins_aliquota,'
       '  nrtclassificacao_is,'
-      '  nrtclassificacao_ibscbs,'
       '  nrtclassificacao_cpresumido,'
       '  nrtibs_aliquota_estadual,'
       '  nrtibs_aliquota_municipal,'
@@ -2370,11 +2362,6 @@ object fnfce: Tfnfce
       Required = True
       Size = 50
     end
-    object nrtnrtclassificacao_ibscbs: TStringField
-      FieldName = 'nrtclassificacao_ibscbs'
-      Required = True
-      Size = 50
-    end
     object nrtnrtclassificacao_cpresumido: TStringField
       FieldName = 'nrtclassificacao_cpresumido'
       Required = True
@@ -2441,7 +2428,25 @@ object fnfce: Tfnfce
       end>
   end
   object mnr: TUniQuery
+    SQL.Strings = (
+      'SELECT'
+      '  mnrchave,'
+      '  meschave,'
+      '  total_base_ibscbs,'
+      '  total_ibs_uf,'
+      '  total_ibs_mun,'
+      '  total_ibs_ufmun,'
+      '  credito_presumido_ibs,'
+      '  total_cbs,'
+      '  credito_presumido_cbs'
+      'FROM mnr where meschave=:meschave')
     Left = 136
     Top = 504
+    ParamData = <
+      item
+        DataType = ftUnknown
+        Name = 'meschave'
+        Value = nil
+      end>
   end
 end
