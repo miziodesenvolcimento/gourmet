@@ -62,6 +62,7 @@ Both `Tfnfe` and `Tfnfce` follow the same shape, so patterns learned in one carr
 
 ## Working in this repo
 
+- **Escopo de trabalho: somente `mnfegourmet.bpl`.** Ajustes e correções devem ser feitos **apenas** nos arquivos deste diretório (`mnfe` — os fontes que compõem `mnfegourmet.bpl`). Não editar pacotes irmãos (`GourmetServer`, `aiq`, `TermGourmet`, `mentregas`, `MizioProducao`, `mGourmetStone`, kernel, etc.), mesmo que apareçam alterados em `git status`. Ao fazer `git add`, **stage apenas os fontes do `mnfe` por nome**.
 - **Never edit files in `__history\` or `__recovery\`** — those are the IDE's autosave backups; changes there will be overwritten and won't compile.
 - **`.dfm` files are the form layouts** (binary-equivalent text). Avoid editing them by hand for layout changes — let the IDE do it. Editing event handler name strings or constants in `.dfm` is fine.
 - **There is no `.gitignore`** anywhere in this tree, so `git status` is permanently noisy with `.dcu`, `.bpl`, `.identcache`, `.dproj.local`, etc. from every sibling package. Stage source files **by name** — never `git add -A` / `git add .`, you will pull in megabytes of compiler output. To see only `.pas`/`.dfm`/`.dpr` changes: `git status -s | grep -E '\.(pas|dfm|dpr|dpk|dproj)$'`.
