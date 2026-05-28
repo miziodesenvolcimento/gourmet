@@ -1,0 +1,60 @@
+# ==========================================================================
+# .gitignore - Delphi / RAD Studio (Gourmet)
+# Ignora binarios e artefatos de compilacao. Fontes (.pas .dfm .dpr .dpk
+# .dproj .inc .res) continuam versionados.
+# ==========================================================================
+
+# --- Saida de compilacao / binarios ---
+*.dcu
+*.dcp
+*.bpl
+*.bpi
+*.exe
+*.dll
+*.so
+*.rsm
+*.o
+*.obj
+*.a
+*.lib
+*.map
+*.drc
+*.tds
+*.dbg
+*.apk
+*.aab
+*.ipa
+
+# --- Arquivos locais / estado do IDE ---
+*.local
+*.identcache
+*.dsk
+*.~*
+__history/
+__recovery/
+__astcache/
+*.stat
+*.deployproj
+
+# --- Diretorios de saida por plataforma/config ---
+Win32/
+Win64/
+OSX64/
+OSXARM64/
+Android/
+Android64/
+iOSDevice64/
+iOSSimulator/
+iOSSimARM64/
+Linux64/
+
+# --- Diretorios de deploy do Gourmet ---
+modulos/
+dcu/
+
+# --- Banco / logs / temporarios ---
+*.gdb
+*.fdb
+*.log
+*.tmp
+Thumbs.db
