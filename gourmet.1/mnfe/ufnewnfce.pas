@@ -1355,7 +1355,8 @@ begin
     if not DirectoryExists(vPathPDF) then
       ForceDirectories(vPathPDF);
     except
-
+      on E: Exception do
+        SalvarLogErro(E.Message, E.StackTrace);
     end;
 
     vpArquivoPDFEvento := vPathPDF + qEnfMevenfchaveevento.AsString + '-ProcEventoNFe.pdf';
@@ -1405,7 +1406,8 @@ begin
   if not DirectoryExists(ACBrNFeNFCe.DANFE.PathPDF) then
     ForceDirectories(ACBrNFeNFCe.DANFE.PathPDF);
   except
-
+    on E: Exception do
+      SalvarLogErro(E.Message, E.StackTrace);
   end;
   ACBrNFeNFCe.ImprimirEventoPDF;
 
@@ -2280,7 +2282,8 @@ begin
     if not DirectoryExists(ExtractFilePath(application.ExeName) + 'logsnfce') then
       ForceDirectories(ExtractFilePath(application.ExeName) + 'logsnfce');
     except
-
+      on E: Exception do
+        SalvarLogErro(E.Message, E.StackTrace);
     end;
     info.Lines.SaveToFile(ExtractFilePath(application.ExeName) + 'logsnfce\' + formatdatetime('yyyymmddnnss', now()) + '.txt');
 
@@ -3179,7 +3182,8 @@ Begin
               autXML.add.CNPJCPF := SoNumeros(ctdctdcnpj.AsString);
             end;
           except
-
+            on E: Exception do
+              SalvarLogErro(E.Message, E.StackTrace);
           end;
         end;
       end;
@@ -5398,6 +5402,13 @@ Begin
       end
       else
       begin
+        // [#9] Anomalia: vai gerar um NOVO numero, porem ja existe chave vinculada no banco.
+        // NAO bloqueia (NFC-e pode estar em contingencia aguardando transmissao), mas registra
+        // em log para dar visibilidade ao risco de duplicidade. A chave do NFC-e e deterministica
+        // (numero + cNF reaproveitados do banco), entao a reemissao normal nao gera chave nova.
+        if Trim(mesmeschavenfe.AsString) <> '' then
+          SalvarLogErro('NFC-e: gerando novo numero com chave ja vinculada (' +
+            mesmeschavenfe.AsString + ') - meschave ' + self.mesmeschave.AsString, '');
 
         NumeroNFCe.ExecSQL;
         vNumeroNFe := NumeroNFCe.Fields[0].AsInteger;
@@ -5715,11 +5726,15 @@ begin
         try
           SalvarArquivoCloud('NFCe', vACBrNFe.NotasFiscais.Items[0].NomeArq);
         except
+          on E: Exception do
+            SalvarLogErro(E.Message, E.StackTrace);
         end;
 
         try
           vlArqNFCe := GeraNomeArqNFCe(vMesChave, vFlaCodigo);
         except
+          on E: Exception do
+            SalvarLogErro(E.Message, E.StackTrace);
         end;
 
         vACBrNFe.NotasFiscais.Clear;
@@ -5905,6 +5920,8 @@ begin
         try
           vlArqNFCe := GeraNomeArqNFCe(vMesChave, vFlaCodigo);
         except
+          on E: Exception do
+            SalvarLogErro(E.Message, E.StackTrace);
         end;
 
         vACBrNFe.NotasFiscais.Clear;
@@ -5970,7 +5987,8 @@ begin
               qconsulta.SQL.add('WHERE meschave = ' + vMesChave);
               qconsulta.ExecSQL;
             except
-
+              on E: Exception do
+                SalvarLogErro(E.Message, E.StackTrace);
             end;
 
           end;
@@ -6755,6 +6773,8 @@ Begin
         end;
 
       except
+        on E: Exception do
+          SalvarLogErro(E.Message, E.StackTrace);
       end;
 
       consulta.Close;
@@ -7087,7 +7107,8 @@ begin
   if not DirectoryExists(vpPastaPrincipal) then
     ForceDirectories(vpPastaPrincipal);
   except
-
+    on E: Exception do
+      SalvarLogErro(E.Message, E.StackTrace);
   end;
 
   vpAAAAMMNNNFCe := vpPastaPrincipal + vpSubPastaDoc + '\' + formatdatetime('yyyymm', Data) + '\';
@@ -7095,7 +7116,8 @@ begin
   if not DirectoryExists(vpAAAAMMNNNFCe) then
     ForceDirectories(vpAAAAMMNNNFCe);
   except
-
+    on E: Exception do
+      SalvarLogErro(E.Message, E.StackTrace);
   end;
 
   ACBrNFeNFCe.Configuracoes.Arquivos.PathSalvar := vpAAAAMMNNNFCe;

@@ -68,8 +68,8 @@ O NFC-e tem arquitetura mais decomposta (`GeraNFCe`, `AssinaNota`, `ValidaNota`,
 | #4/#5 NCM/CFOP/descrição/valor por item | ✅ Aplicado — valida `NFe.Det`, bloqueia (`Result:=False`) | `GeraNFCe` após os totais ~4030 |
 | #3 `mesdatanfe` = `ide.dEmi` | ⬜ **Já em boa parte correto** no NFC-e (caminho normal usa `ide.dEmi`); restam usos de `vpDataAtual` em contingência (provavelmente intencional) | `SalvaNormal`/`SalvaEmCoontigencia` |
 | #2 Reconciliação de totais | ⬜ **Menos crítico** — NFC-e já calcula `vNF` por componentes (`vlTotBruto - vlTotDesc + frete + outras`), não do banco | `GeraNFCe` ~4027 |
-| #9 Bloqueio de nova chave (`meschavenfe`) | ⬜ **Adiado** — fluxo NFC-e (contingência) é diferente; aplicar com cuidado/teste | — |
-| #7 `try/except` vazios | ⬜ **Adiado** — há ~11 no NFC-e; cleanup repetitivo melhor com feedback do compilador na IDE | vários |
+| #9 Bloqueio de nova chave (`meschavenfe`) | ✅ **Coberto por design + log** — NFC-e reusa número (guarda modelo 65, ~5398) e cNF (quando há protocolo, ~5413) → chave determinística, sem duplicar mesmo sem o XML. O bloqueio "chave sem protocolo" do NF-e NÃO se aplica (quebraria contingência). Adicionado log de anomalia (número novo com chave já vinculada) | `GeraNFCe` ~5404 |
+| #7 `try/except` vazios | ✅ **Aplicado** — os 11 blocos vazios agora registram via `SalvarLogErro` | `ufnewnfce.pas` (vários) |
 
 ## Diferenciação visual aplicada (v1.0)
 
