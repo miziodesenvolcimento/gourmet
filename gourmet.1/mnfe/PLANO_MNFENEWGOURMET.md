@@ -83,6 +83,17 @@ Mudanças de **baixo risco** (só propriedades de componentes já existentes —
 
 Assim, ao rodar o módulo novo, a faixa/splash verde e o título deixam óbvio que é o `mnfenewgourmet.bpl`. A modernização mais profunda (VCL Styles / redesenho) e a modernização de código ficam no roadmap acima.
 
+## Tema moderno (VCL Styles)
+
+Os forms novos (`Tfnfe`/`Tfnfce`) agora aplicam um **estilo VCL moderno** ao abrir e **restauram** o estilo original do host ao fechar (escopo: enquanto a tela do módulo novo está aberta). Implementado em `FormShow`/`FormClose` via `TStyleManager` (`AplicaEstiloModerno`/`AplicaEstiloModernoNFCe`), tentando nesta ordem: `Windows11 Modern Light`, `Glow`, `Sky`, `Cobalt XEMedia`, `Windows10 SlateGray`.
+
+**Passo único na IDE (obrigatório para o tema aparecer):**
+1. Abrir `mnfenewgourmet.dproj` no RAD Studio.
+2. **Project > Options > Application > Appearance** (Estilos personalizados) → marcar **Windows11 Modern Light** (ou outro da lista acima).
+3. Rebuild. O estilo é embutido no BPL e registrado ao carregar; o código então o aplica.
+
+Sem esse passo, `TrySetStyle` retorna `False` para todos e o visual atual é mantido (**no-op seguro** — não quebra nada). A faixa accent (teal/verde) e o título "NOVA VERSÃO" continuam visíveis sobre o tema, mantendo a identidade do módulo novo. ⚠️ O estilo VCL é **global do app**: enquanto a tela do módulo novo estiver aberta, o host pode aparecer com o tema; ao fechar, volta ao normal.
+
 ## Build e ativação
 
 1. Abrir `mnfenewgourmet.dproj` no RAD Studio (mesma IDE/ambiente do atual).

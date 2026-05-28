@@ -13,7 +13,7 @@ uses
   IdTCPClient, IdExplicitTLSClientServerBase, IdMessageClient, IdSMTPBase,
   IdSMTP, IdAttachment, IdAttachmentFile, ACBrDFeReport, ACBrDFeDANFeReport,
   ACBrDANFCeFortesFr, ACBrDFeUtil, midaslib, ACBrDFeSSL, blcksock, IdEMailAddress,
-  System.JSON,ACBrDFe.Conversao;
+  System.JSON,ACBrDFe.Conversao, Vcl.Themes;
 
 type
   Tfnfce = class(TForm)
@@ -2301,15 +2301,52 @@ begin
 
 end;
 
+var
+  vpEstiloHostAnteriorNFCe: string = ''; // [UI] estilo VCL do host antes do tema do módulo novo
+
+// [UI] Aplica o primeiro estilo VCL moderno disponível (no-op seguro se nenhum estiver registrado).
+procedure AplicaEstiloModernoNFCe;
+const
+  cEstilos: array[0..4] of string =
+    ('Windows11 Modern Light', 'Glow', 'Sky', 'Cobalt XEMedia', 'Windows10 SlateGray');
+var
+  vEstilo: string;
+begin
+  for vEstilo in cEstilos do
+    if TStyleManager.TrySetStyle(vEstilo, False) then
+      Exit;
+end;
+
 procedure Tfnfce.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   inherited;
+  // [UI] Restaura o estilo original do host ao fechar a tela do módulo novo.
+  try
+    if vpEstiloHostAnteriorNFCe <> '' then
+      TStyleManager.TrySetStyle(vpEstiloHostAnteriorNFCe, False);
+  except
+    on E: Exception do
+      SalvarLogErro(E.Message, E.StackTrace);
+  end;
   Action := cafree;
 end;
 
 procedure Tfnfce.FormShow(Sender: TObject);
 begin
   inherited;
+
+  // [UI] Tema moderno (VCL Styles): salva o estilo atual do host e aplica um estilo moderno enquanto
+  // a tela do módulo novo está aberta (restaurado no FormClose). Requer um estilo habilitado em
+  // Opções do Projeto > Appearance; sem isso, mantém o visual atual (no-op seguro).
+  try
+    if vpEstiloHostAnteriorNFCe = '' then
+      vpEstiloHostAnteriorNFCe := TStyleManager.ActiveStyle.Name;
+    AplicaEstiloModernoNFCe;
+  except
+    on E: Exception do
+      SalvarLogErro(E.Message, E.StackTrace);
+  end;
+
   Self.Width := 520;
   Self.Height := 230;
 

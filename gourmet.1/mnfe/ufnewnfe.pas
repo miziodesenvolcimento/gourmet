@@ -618,7 +618,7 @@ Var
 Implementation
 
 uses
-  ufnewnfecorrecao, uCloudComunicacao, ACBrUtil.DateTime;
+  ufnewnfecorrecao, uCloudComunicacao, ACBrUtil.DateTime, Vcl.Themes;
 
 {$R *.dfm}
 
@@ -863,23 +863,57 @@ begin
     Result := False;
 end;
 
+var
+  vpEstiloHostAnterior: string = ''; // [UI] estilo VCL do host antes de aplicar o tema do módulo novo
+
+// [UI] Aplica o primeiro estilo VCL moderno disponível (no-op seguro se nenhum estiver registrado).
+procedure AplicaEstiloModerno;
+const
+  cEstilos: array[0..4] of string =
+    ('Windows11 Modern Light', 'Glow', 'Sky', 'Cobalt XEMedia', 'Windows10 SlateGray');
+var
+  vEstilo: string;
+begin
+  for vEstilo in cEstilos do
+    if TStyleManager.TrySetStyle(vEstilo, False) then
+      Exit;
+end;
+
 Procedure Tfnfe.FormClose(Sender: TObject; Var Action: TCloseAction);
 Begin
+  // [UI] Restaura o estilo original do host ao fechar a tela do módulo novo.
+  try
+    if vpEstiloHostAnterior <> '' then
+      TStyleManager.TrySetStyle(vpEstiloHostAnterior, False);
+  except
+    on E: Exception do
+      SalvarLogErro(E.Message, E.StackTrace);
+  end;
   Action := caFree;
 End;
 
 procedure Tfnfe.FormShow(Sender: TObject);
 begin
+  // [UI] Identidade visual da nova versão no título da janela.
+  self.Caption := 'Gerenciamento de Notas  [ NOVA VERS' + #195 + 'O - mnfeNEWgourmet ]  v.: ' +
+    GetAppVersionStr(extractfilepath(application.ExeName) + 'modulos/mnfenewgourmet.bpl');
 
-  self.Caption:='Gerenciamento de Notas - v.:  '+GetAppVersionStr(extractfilepath(application.ExeName)+'modulos/mnfegourmet.bpl');
+  // [UI] Tema moderno (VCL Styles): salva o estilo atual do host e aplica um estilo moderno enquanto
+  // a tela do módulo novo está aberta (restaurado no FormClose). Requer um estilo habilitado em
+  // Opções do Projeto > Appearance; sem isso, mantém o visual atual (no-op seguro).
+  try
+    if vpEstiloHostAnterior = '' then
+      vpEstiloHostAnterior := TStyleManager.ActiveStyle.Name;
+    AplicaEstiloModerno;
+  except
+    on E: Exception do
+      SalvarLogErro(E.Message, E.StackTrace);
+  end;
 
   self.Width := 500;
   self.Height := 250;
 
   ajustafuncao;
-
-
-
 end;
 
 procedure Tfnfe.IdSMTPConnected(Sender: TObject);
