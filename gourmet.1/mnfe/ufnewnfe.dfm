@@ -383,7 +383,7 @@ object fnfe: Tfnfe
     Align = alLeft
     BevelOuter = bvNone
     Caption = 'mnfeNEWgourmet'#13#10#13#10'NOVA VERS'#227'O'#13#10'v1.0'
-    Color = clGreen
+    Color = 7043328
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWhite
     Font.Height = -13

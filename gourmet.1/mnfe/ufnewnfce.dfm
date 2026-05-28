@@ -27,7 +27,7 @@ object fnfce: Tfnfce
     BevelOuter = bvNone
     BorderWidth = 2
     Caption = '  mnfeNEWgourmet   -   NFC-e   -   [ NOVA VERS'#227'O v1.0 ]   -   IBS/CBS'
-    Color = clGreen
+    Color = 7043328
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWhite
     Font.Height = -15

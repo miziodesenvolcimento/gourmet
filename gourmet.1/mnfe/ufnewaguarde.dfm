@@ -11,7 +11,7 @@ object faguarde: Tfaguarde
   Caption = 'Conectando SEFAZ - Aguarde ...  [ NOVA VERS'#227'O ]'
   ClientHeight = 178
   ClientWidth = 699
-  Color = clGreen
+  Color = 7043328
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
