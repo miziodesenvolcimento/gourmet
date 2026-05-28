@@ -15,7 +15,7 @@ object faguarde: Tfaguarde
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
-  Font.Name = 'Tahoma'
+  Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
   OldCreateOrder = False
@@ -38,8 +38,8 @@ object faguarde: Tfaguarde
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWhite
     Font.Height = -33
-    Font.Name = 'Tahoma'
-    Font.Style = []
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
     ParentFont = False
     ExplicitLeft = 0
     ExplicitTop = 0
