@@ -777,7 +777,10 @@ begin
       8:
         Result := fnfce.Geraxml(vMesChave, fnfce.vpFlacodigo);
       10:
+        begin
+
         Result := fnfce.ImprimeNFCe(vMesChave, fnfce.vpFlacodigo, True);
+        end;
       11:
         Result := fnfce.EmailNFCe(vMesChave, fnfce.vpFlacodigo, True, vemail);
       12:
@@ -1309,8 +1312,9 @@ begin
     begin
       If not FileExists(vlArqNFCe) Then
       Begin
-        if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (pos('c:\',lowercase(cfgcfgservarqnfes.AsString))=0) then
+        if (cfgcfgservarqnfes.AsString <> '127.0.0.1')  then
         begin
+
           vlArqNFCe := BaixaXMLServidor(IPServidorArquivos, vlArqNFCe);
         end;
 
@@ -1759,7 +1763,7 @@ begin
     if ACBrNFeNFCe.Configuracoes.WebServices.Ambiente <> taHomologacao then
     begin
 
-      if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (pos('c:\',lowercase(cfgcfgservarqnfes.AsString))=0) then
+      if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (vlArqNFCe<>'')  then
       begin
         vlArqNFCe := BaixaXMLServidor(IPServidorArquivos, vlArqNFCe);
         Exit;
@@ -1798,6 +1802,17 @@ begin
     if FileExists(vlArqNFCe) then
       Exit;
 
+    if ACBrNFeNFCe.Configuracoes.WebServices.Ambiente <> taHomologacao then
+    begin
+
+      if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (vlArqNFCe<>'')  then
+      begin
+        vlArqNFCe := BaixaXMLServidor(IPServidorArquivos, vlArqNFCe);
+        Exit;
+      end;
+
+    end;
+
 
     (* Tenta encontrar arquivo da NFCe com emissão em CONTINGÊNCIA - CÓD 2 *)
     vlArqNFCe := copy(vlUfCod, 1, 2);
@@ -1816,6 +1831,16 @@ begin
     if FileExists(vlArqNFCe) then
       Exit;
 
+  if ACBrNFeNFCe.Configuracoes.WebServices.Ambiente <> taHomologacao then
+    begin
+
+      if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (vlArqNFCe<>'')  then
+      begin
+        vlArqNFCe := BaixaXMLServidor(IPServidorArquivos, vlArqNFCe);
+        Exit;
+      end;
+
+    end;
 
     (* Tenta encontrar arquivo da NFCe com emissão em CONTINGÊNCIA OFFLINE - CÓD 9 *)
     vlArqNFCe := copy(vlUfCod, 1, 2);
@@ -1834,6 +1859,16 @@ begin
     if FileExists(vlArqNFCe) then
       Exit;
 
+  if ACBrNFeNFCe.Configuracoes.WebServices.Ambiente <> taHomologacao then
+    begin
+
+      if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (vlArqNFCe<>'')  then
+      begin
+        vlArqNFCe := BaixaXMLServidor(IPServidorArquivos, vlArqNFCe);
+        Exit;
+      end;
+
+    end;
 
     vlArqNFCe := '';
   finally
@@ -1841,114 +1876,6 @@ begin
   end;
 end;
 
-{
-  function Tfnfce.GeraNomeArqNFCe(vMesChave: string; vFlaCodigo: String = '1'): string;
-  var
-  vlArqNFCe: String;
-  vData: double;
-  vlCNPJ: String;
-  vlNrNFCe, vlNrSer, vlCodigoNFCe: Integer;
-
-  vlUfCod: string;
-
-  begin
-  vlArqNFCe := '';
-
-  try
-  mes.Close;
-  mes.Params[0].AsString := vMesChave;
-  mes.Params[1].AsString := vFlaCodigo;
-  mes.Open;
-
-  if mesmesnumero.AsInteger = 0 then
-  Exit;
-
-  if mesmesdatanfe.AsFloat = 0 then
-  vData := mesmesregistro.AsFloat
-  else
-  vData := mesmesdatanfe.AsFloat;
-
-  if mesmeschavenfe.AsString <> '' then
-  begin
-  vlArqNFCe := mesmeschavenfe.AsString;
-  vlArqNFCe := vpPastaPrincipal + vpSubPastaDoc + '\' + formatdatetime('yyyymm', vData) + '\' + vlArqNFCe + '-nfe.xml';
-  end;
-
-  if FileExists(vlArqNFCe) then
-  Exit;
-
-  (* Tenta encontrar arquivo da NFCe com geração NORMAL *)
-  vlCNPJ := SomenteNumeros(Self.cfgetddoc1.AsString);
-  vlUfCod := Copy(Self.cfgcddcodigo.AsString, 1, 2);
-
-  vlNrNFCe := mesmesnumero.AsInteger;
-  vlCodigoNFCe := mesmescodigonota.AsInteger;
-
-  if mesmesserie.AsString <> '' then
-  vlNrSer := mesmesserie.AsInteger
-  else
-  vlNrSer := 1;
-
-  vlCNPJ := SomenteNumeros(vlCNPJ);
-
-  // nome da nota com emissao normal
-  vlArqNFCe := Copy(vlUfCod, 1, 2);
-  vlArqNFCe := vlArqNFCe + formatdatetime('yymm', vData);
-  vlArqNFCe := vlArqNFCe + vlCNPJ;
-  vlArqNFCe := vlArqNFCe + '65';
-  vlArqNFCe := vlArqNFCe + FormatFloat('000', vlNrSer);
-  vlArqNFCe := vlArqNFCe + FormatFloat('000000000', vlNrNFCe);
-  vlArqNFCe := vlArqNFCe + '1';
-  vlArqNFCe := vlArqNFCe + FormatFloat('00000000', vlCodigoNFCe);
-  vlArqNFCe := vlArqNFCe + Modulo11(trim(vlArqNFCe));
-  vlArqNFCe := vlArqNFCe + '-nfe.xml';
-
-  vlArqNFCe := vpPastaPrincipal + vpSubPastaDoc + '\' + formatdatetime('yyyymm', vData) + '\' + vlArqNFCe;
-
-  if FileExists(vlArqNFCe) then
-  Exit;
-
-  (* Tenta encontrar arquivo da NFCe com emissão em CONTINGÊNCIA - CÓD 2 *)
-  vlArqNFCe := Copy(vlUfCod, 1, 2);
-  vlArqNFCe := vlArqNFCe + formatdatetime('yymm', vData);
-  vlArqNFCe := vlArqNFCe + vlCNPJ;
-  vlArqNFCe := vlArqNFCe + '65';
-  vlArqNFCe := vlArqNFCe + FormatFloat('000', vlNrSer);
-  vlArqNFCe := vlArqNFCe + FormatFloat('000000000', vlNrNFCe);
-  vlArqNFCe := vlArqNFCe + '2';
-  vlArqNFCe := vlArqNFCe + FormatFloat('00000000', vlCodigoNFCe);
-  vlArqNFCe := vlArqNFCe + Modulo11(trim(vlArqNFCe));
-  vlArqNFCe := vlArqNFCe + '-nfe.xml';
-
-  vlArqNFCe := vpPastaPrincipal + vpSubPastaDoc + '\' + formatdatetime('yyyymm', vData) + '\' + vlArqNFCe;
-
-  if FileExists(vlArqNFCe) then
-  Exit;
-
-  (* Tenta encontrar arquivo da NFCe com emissão em CONTINGÊNCIA OFFLINE - CÓD 9 *)
-  vlArqNFCe := Copy(vlUfCod, 1, 2);
-  vlArqNFCe := vlArqNFCe + formatdatetime('yymm', vData);
-  vlArqNFCe := vlArqNFCe + vlCNPJ;
-  vlArqNFCe := vlArqNFCe + '65';
-  vlArqNFCe := vlArqNFCe + FormatFloat('000', vlNrSer);
-  vlArqNFCe := vlArqNFCe + FormatFloat('000000000', vlNrNFCe);
-  vlArqNFCe := vlArqNFCe + '9';
-  vlArqNFCe := vlArqNFCe + FormatFloat('00000000', vlCodigoNFCe);
-  vlArqNFCe := vlArqNFCe + Modulo11(trim(vlArqNFCe));
-  vlArqNFCe := vlArqNFCe + '-nfe.xml';
-
-  vlArqNFCe := vpPastaPrincipal + vpSubPastaDoc + '\' + formatdatetime('yyyymm', vData) + '\' + vlArqNFCe;
-
-  if FileExists(vlArqNFCe) then
-  Exit;
-
-  (* Se chegou até aqui é porque arquivo não existe *)
-
-  vlArqNFCe := '';
-  finally
-  Result := vlArqNFCe;
-  end;
-  end; }
 
 function Tfnfce.GeraNomeArqNFCeTipo(vMesChave: string; vTipoEmissao: Integer; vFlaCodigo: string = '1'): string;
 var
@@ -2064,11 +1991,12 @@ Begin
 
       If not FileExists(vArqNFCe) Then
       Begin
-        if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (pos('c:\',lowercase(cfgcfgservarqnfes.AsString))=0) then
+        if (cfgcfgservarqnfes.AsString <> '127.0.0.1')  then
         begin
 
         if pos('gourmetstone', application.ExeName)=0 then
           ShowMessage('2235 Arquivo baixado servidor!' + #13 + #13 + vArqNFCe);
+
 
 
           vArqNFCe := BaixaXMLServidor(IPServidorArquivos, vArqNFCe);
@@ -2152,6 +2080,8 @@ Begin
         consulta.SQL.add('mesprotocolo = ''' + nProt + ''' WHERE ');
         consulta.SQL.add('meschave = ' + vMesChave + ' and flacodigo=' + vFlaCodigo);
         consulta.ExecSQL;
+
+
 
         consulta.Close;
         consulta.SQL.Text := 'set @disable_triggers=null';
@@ -2416,7 +2346,7 @@ begin
   If not FileExists(vpNomeArquivoNFCe) Then
   Begin
 
-    if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (pos('c:\',lowercase(cfgcfgservarqnfes.AsString))=0)  then
+    if (cfgcfgservarqnfes.AsString <> '127.0.0.1') then
     begin
       vpNomeArquivoNFCe := BaixaXMLServidor(IPServidorArquivos, vpNomeArquivoNFCe);
     end;
@@ -3556,18 +3486,18 @@ Begin
             Begin
               case Emit.CRT of
                 crtSimplesNacional:
-                  vlCSOSNIcms := StrToCSOSNIcms(vlCSOSNIcmsOK, itmcstcodigo.AsString);
+                begin
+                  vlCSOSNIcms := StrToCSOSNIcms(itmcstcodigo.AsString);
+                  CSOSN := vlCSOSNIcms;
+                end;
                 crtRegimeNormal, crtSimplesExcessoReceita:
-                  vlCSTIcms := StrToCSTICMS(vlCSTIcmsOK, Copy(self.itmcstcodigo.AsString, 2, 2));
+                begin
+                  vlCSTIcms := StrToCSTICMS( Copy(self.itmcstcodigo.AsString, 2, 2));
+                  CST := vlCSTIcms;
+                end;
               end;
 
-              (* CST *)
-              if vlCSTIcmsOK then
-                CST := vlCSTIcms;
 
-              (* CSOSN *)
-              if vlCSOSNIcmsOK then
-                CSOSN := vlCSOSNIcms;
 
               ICMS.modBC := dbiValorOperacao;
 
@@ -3610,7 +3540,7 @@ Begin
               vlTotBC := vlTotBC + ICMS.vBC;
             End;
 
-            pis.CST := StrToCSTPIS(ok, itmcspcodigo.AsString);
+            pis.CST := StrToCSTPIS(itmcspcodigo.AsString);
             if itmitmaliqpis.AsFloat > 0 then
             begin
               pis.vBC := itmitmbpis.AsCurrency;
@@ -3618,7 +3548,7 @@ Begin
               pis.vPIS := itmitmpis.AsCurrency;
             end;
 
-            COFINS.CST := StrToCSTCOFINS(ok, itmcsfcodigo.AsString);
+            COFINS.CST := StrToCSTCOFINS(itmcsfcodigo.AsString);
 
             if itmitmaliqcofins.AsFloat > 0 then
             begin
@@ -3640,49 +3570,6 @@ Begin
 
               if (nrt.RecordCount>0) {and (copy(mesmesprotocolo.asstring,1,6)<>'000000') and (copy(mesmesprotocolo.asstring,1,6)<>'')}  then
               begin
-
-                inr.close;
-                inr.ParamByName('itmchave').AsString:=itmitmchave.AsString;
-                inr.Open;
-
-                if inr.RecordCount>0 then
-                begin
-
-                  //  Informações do tributo: IBS / CBS
-
-                  IBSCBS.CST := StrToCSTIBSCBS(inr.FieldByName('cst_ibscbs').AsString);
-                  IBSCBS.cClassTrib :=inr.FieldByName('class_trib_ibscbs').AsString;
-                  IBSCBS.gIBSCBS.vBC :=inr.FieldByName('base_calc_ibscbs').AsCurrency;
-
-                  TotalIBSCBSgIBSCBSvBC:=SimpleRoundTo(TotalIBSCBSgIBSCBSvBC+IBSCBS.gIBSCBS.vBC,-2);
-
-
-                  // pAliqEfet=0,0600%×(1−0,40)=0,0600%×0,60
-                  IBSCBS.gIBSCBS.gIBSUF.pIBSUF :=inr.FieldByName('perc_ibs_uf').AsCurrency;
-                  IBSCBS.gIBSCBS.gIBSUF.gRed.pRedAliq :=inr.FieldByName('red_aliq_ibs_uf').AsCurrency;
-                  IBSCBS.gIBSCBS.gIBSUF.gRed.pAliqEfet :=inr.FieldByName('aliq_efetiva_ibs_uf').AsCurrency;
-                  IBSCBS.gIBSCBS.gIBSUF.vIBSUF :=inr.FieldByName('valor_ibs_uf').AsCurrency;
-                  TotalIBSCBSgIBSCBSgIBSUFvIBSUF:=SimpleRoundTo(TotalIBSCBSgIBSCBSgIBSUFvIBSUF+IBSCBS.gIBSCBS.gIBSUF.vIBSUF,-2);
-
-
-                  IBSCBS.gIBSCBS.gIBSMun.pIBSMun :=inr.FieldByName('perc_ibs_mun').AsCurrency;
-                  IBSCBS.gIBSCBS.gIBSMun.gRed.pRedAliq :=inr.FieldByName('red_aliq_ibs_mun').AsCurrency;
-                  IBSCBS.gIBSCBS.gIBSMun.gRed.pAliqEfet :=inr.FieldByName('aliq_efetiva_ibs_mun').AsCurrency;
-                  IBSCBS.gIBSCBS.gIBSMun.vIBSMun :=inr.FieldByName('valor_ibs_mun').AsCurrency;
-                  TotalIBSCBSgIBSCBSgIBSMunvIBSMun:=SimpleRoundTo(TotalIBSCBSgIBSCBSgIBSMunvIBSMun+IBSCBS.gIBSCBS.gIBSMun.vIBSMun,-2);
-
-                  IBSCBS.gIBSCBS.gCBS.pCBS :=inr.FieldByName('perc_cbs').AsCurrency;
-                  IBSCBS.gIBSCBS.gCBS.gRed.pRedAliq :=inr.FieldByName('red_aliq_cbs').AsCurrency;
-                  IBSCBS.gIBSCBS.gCBS.gRed.pAliqEfet :=inr.FieldByName('aliq_efetiva_cbs').AsCurrency;
-                  IBSCBS.gIBSCBS.gCBS.vCBS :=inr.FieldByName('valor_cbs').AsCurrency;
-
-                  TotalIBSCBSgIBSCBSgCBSvCBS:=SimpleRoundTo(TotalIBSCBSgIBSCBSgCBSvCBS+IBSCBS.gIBSCBS.gCBS.vCBS,-2);
-
-                  IBSCBS.gIBSCBS.vIBS := inr.FieldByName('total_ibs_ufmun').AsCurrency;
-
-                end
-                else
-                begin
 
 
                   //  Informações do tributo: IBS / CBS
@@ -3776,7 +3663,7 @@ Begin
                   inr.FieldByName('total_ibs_ufmun').AsCurrency:=IBSCBS.gIBSCBS.vIBS;
                   inr.Post;
 
-                end;
+
               end;
 
             end;
@@ -5481,7 +5368,11 @@ Begin
       consulta.SQL.add('WHERE meschave = ' + vMesChave);
       consulta.ExecSQL;
 
-      info.Lines.add('Iniciar comunicação: ' + datetimetostr(now));
+
+
+    {  entraemcontigencia('Falha de comunicação ou internet: ' + datetimetostr(now));
+
+      info.Lines.add('Falha de comunicação ou internet: ' + datetimetostr(now));}
 
       if (Copy(mesmesprotocolo.AsString, 1, 15) <> '000000000000000') and (mesmesprotocolo.AsString <> '') then
       begin
@@ -5633,6 +5524,11 @@ begin
     consulta.SQL.add('meschave = ' + vMesChave + ' and flacodigo=' + vFlaCodigo);
     consulta.ExecSQL;
 
+
+    entraemcontigencia('Falha de comunicação ou internet: ' + datetimetostr(now));
+
+    info.Lines.add('Falha de comunicação ou internet: ' + datetimetostr(now));
+
     mes.Close;
     mes.Params[0].AsString := vMesChave;
     mes.Params[1].AsString := vFlaCodigo;
@@ -5699,7 +5595,7 @@ begin
   Try
 
 
-    if vACBrNFe.Enviar(0, False, True, false) then
+    if vACBrNFe.Enviar(0, False, true, false) then
     begin
 
       vCStat := vACBrNFe.NotasFiscais.Items[0].NFe.procNFe.CStat;
@@ -5756,6 +5652,8 @@ begin
   Except
     On E: Exception Do
     Begin
+
+     // showmessage(e.Message);
 
       if pos('stone',lowercase( application.ExeName))>0  then
         exit;
@@ -6013,6 +5911,20 @@ begin
       end
 
       else if (vCStat = 0) or (vCStat = 999) then // Geralmente indica falha de comunicação com a SEFAZ
+      begin
+
+        entraemcontigencia(E.Message);
+        sleep(500);
+        vpNomeArquivoNFCe := fnfce.GeraNomeArqNFCe(vMesChave, vFlaCodigo);
+
+        GeraNFCe(vMesChave, fnfce.vpFlacodigo);
+
+        if SalvaEmCoontigencia(vACBrNFe, vMesChave) then
+          Result := True
+        else
+          Result := False;
+      end
+      else if (vCStat = 462) or (vCStat = 999) then // COSI CSC invalido
       begin
 
         entraemcontigencia(E.Message);
@@ -6583,8 +6495,9 @@ Begin
 
     If not FileExists(vpNomeArquivoNFCe) Then
     Begin
-      if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (pos('c:\',lowercase(cfgcfgservarqnfes.AsString))=0) then
+      if (cfgcfgservarqnfes.AsString <> '127.0.0.1')  then
       begin
+
         vpNomeArquivoNFCe := BaixaXMLServidor(IPServidorArquivos, vpNomeArquivoNFCe);
       end;
 
@@ -6594,9 +6507,16 @@ Begin
     begin
 
       consulta.Close;
-      consulta.SQL.Text := 'update mes set temcodigo=4 where meschave=' + vlchave;
+      consulta.SQL.Text := 'update mes set temcodigo=50 where meschave=' + vlchave;
       consulta.ExecSQL;
+
+
+      entraemcontigencia('Falha de comunicação ou internet: ' + datetimetostr(now));
+      info.Lines.add('Falha de comunicação ou internet: ' + datetimetostr(now));
+
+
       Exit;
+
 
     end;
 

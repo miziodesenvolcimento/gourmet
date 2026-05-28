@@ -2,7 +2,7 @@ object fnfe: Tfnfe
   Left = 0
   Top = 0
   BorderIcons = []
-  Caption = 'Gerenciamento de Notas - v.:  25.28.501.10 - IBS/CBS'
+  Caption = 'Gerenciamento de Notas - v.:  25.28.501.18 - IBS/CBS'
   ClientHeight = 645
   ClientWidth = 1045
   Color = clWhite
@@ -1555,8 +1555,8 @@ object fnfe: Tfnfe
       
         'select tofidentificacao from tom, tof where tom.tofcodigo=tof.to' +
         'fcodigo')
-    Left = 231
-    Top = 265
+    Left = 223
+    Top = 257
   end
   object rcc: TUniQuery
     SQL.Strings = (
@@ -1934,6 +1934,7 @@ object fnfe: Tfnfe
       '  cfgmsai.cfgcontrolaestoque,'
       '  cfgcertificadoa1,'
       '  cfgapuracaoicm,'
+      '  cfgctacodigopix,'
       ''
       ''
       ''
@@ -2349,6 +2350,9 @@ object fnfe: Tfnfe
     end
     object cfgcfgapuracaoicm: TIntegerField
       FieldName = 'cfgapuracaoicm'
+    end
+    object cfgcfgctacodigopix: TIntegerField
+      FieldName = 'cfgctacodigopix'
     end
   end
   object tcg: TUniQuery
@@ -3075,32 +3079,6 @@ object fnfe: Tfnfe
       Size = 50
     end
   end
-  object rdc: TUniQuery
-    SQL.Strings = (
-      'SELECT'
-      '  ltr.dtlchave,'
-      '  rdc.rdcnrauto,'
-      '  rdc.adccodigo,'
-      '  rdc.rdcparcelas,'
-      '  adc.adcidentificacao,'
-      '  adc.etdcodigo,'
-      '  etd.etddoc1,'
-      '  rdc.bdccodigo,'
-      '  rdcvalor '
-      'FROM ltr'
-      '  INNER JOIN rdc ON ltr.rdcchave = rdc.rdcchave'
-      '  INNER JOIN adc ON rdc.adccodigo = adc.adccodigo'
-      '  INNER JOIN etd ON adc.etdcodigo = etd.etdcodigo'
-      'where ltr.dtlchave=:dtlchave')
-    Left = 177
-    Top = 199
-    ParamData = <
-      item
-        DataType = ftUnknown
-        Name = 'dtlchave'
-        Value = nil
-      end>
-  end
   object qdtl: TUniQuery
     Left = 252
     Top = 472
@@ -3299,6 +3277,65 @@ object fnfe: Tfnfe
       item
         DataType = ftUnknown
         Name = 'meschave'
+        Value = nil
+      end>
+  end
+  object rdc: TUniQuery
+    SQL.Strings = (
+      'SELECT'
+      '  ltr.dtlchave,'
+      '  rdc.rdcnrauto,'
+      '  rdc.adccodigo,'
+      '  rdc.rdcparcelas,'
+      '  adc.adcidentificacao,'
+      '  adc.etdcodigo,'
+      '  etd.etddoc1,'
+      '  rdc.bdccodigo,'
+      '  rdcvalor '
+      'FROM ltr'
+      '  INNER JOIN rdc ON ltr.rdcchave = rdc.rdcchave'
+      '  INNER JOIN adc ON rdc.adccodigo = adc.adccodigo'
+      '  INNER JOIN etd ON adc.etdcodigo = etd.etdcodigo'
+      'where ltr.dtlchave=:dtlchave')
+    Left = 177
+    Top = 215
+    ParamData = <
+      item
+        DataType = ftUnknown
+        Name = 'dtlchave'
+        Value = nil
+      end>
+  end
+  object tagPagamento: TUniQuery
+    SQL.Strings = (
+      
+        'select mdatagpagamento, mdadescrpagamento from mda where mdacodi' +
+        'go=:mdacodigo')
+    Left = 176
+    Top = 264
+    ParamData = <
+      item
+        DataType = ftUnknown
+        Name = 'mdacodigo'
+        Value = nil
+      end>
+    object tagPagamentomdatagpagamento: TIntegerField
+      FieldName = 'mdatagpagamento'
+    end
+    object tagPagamentomdadescrpagamento: TStringField
+      FieldName = 'mdadescrpagamento'
+      Size = 50
+    end
+  end
+  object ctapix: TUniQuery
+    SQL.Strings = (
+      'select ctacnpjbanco from cta where ctacodigo=:ctacodigo')
+    Left = 120
+    Top = 235
+    ParamData = <
+      item
+        DataType = ftUnknown
+        Name = 'ctacodigo'
         Value = nil
       end>
   end

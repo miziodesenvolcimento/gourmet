@@ -451,7 +451,6 @@ Type
     orietdcodigo: TIntegerField;
     orietddoc1: TStringField;
     mesoricodigo: TIntegerField;
-    rdc: TUniQuery;
     qdtl: TUniQuery;
     dtldtlchave: TIntegerField;
     dtlmodalidade: TIntegerField;
@@ -488,6 +487,12 @@ Type
     inr: TUniQuery;
     mnr: TUniQuery;
     mesmesprotocolo: TStringField;
+    rdc: TUniQuery;
+    tagPagamento: TUniQuery;
+    tagPagamentomdatagpagamento: TIntegerField;
+    tagPagamentomdadescrpagamento: TStringField;
+    ctapix: TUniQuery;
+    cfgcfgctacodigopix: TIntegerField;
     Procedure FormClose(Sender: TObject; Var Action: TCloseAction);
     Procedure bconfirmaClick(Sender: TObject);
     Procedure bcancelaClick(Sender: TObject);
@@ -1288,13 +1293,9 @@ Var
   Pack: HModule;
   i: Integer;
   vlNomeArquivoNFe: string;
-  ok: Boolean;
 
-  (* CST e CSOSN *)
-  vlCSTIcmsOK: Boolean;
+
   vlCSTIcms: TpcnCSTIcms;
-
-  vlCSOSNIcmsOK: Boolean;
   vlCSOSNIcms: TpcnCSOSNIcms;
 
   vltotpis: Double;
@@ -1361,6 +1362,9 @@ var
   TotalIBSCBSgIBSCBSgTribRegularvTribRegIBSMun:Double;
   TotalIBSCBSgIBSCBSgTribRegularvTribRegCBS:Double;
 
+  vlCodigoTagOK:Boolean;
+
+  okIPI:Boolean;
 
 Begin
 
@@ -1641,7 +1645,7 @@ Begin
     if (rfi.RecordCount > 0) then
     begin
 
-      // fpCartaoCredito, fpCartaoDebito
+
       vlTotalDescontoServico := 0;
 
       consulta.Close;
@@ -1681,13 +1685,21 @@ Begin
       while not dtl.Eof do
       begin
 
+      if (dtlmodalidade.AsInteger = mdaChequeTerceiros) or
+         (dtlmodalidade.AsInteger = mdaConvenio) or
+         (dtlmodalidade.AsInteger = mdaDinheiro) or
+         (dtlmodalidade.AsInteger = mdaOnline) then
+         begin
+
+
         with pag.add do
         begin
+
 
           if dtlmodalidade.AsInteger = mdaChequeTerceiros then
             tPag := fpCheque;
 
-          if dtlmodalidade.AsInteger = mdaCartaoDebito then
+        {  if dtlmodalidade.AsInteger = mdaCartaoDebito then
           begin
             vlTotalCartoes := vlTotalCartoes + dtldtlvalor.AsCurrency;
             tPag := fpCartaoDebito;
@@ -1699,23 +1711,24 @@ Begin
             vlTotalCartoes := vlTotalCartoes + dtldtlvalor.AsCurrency;
             tPag := fpCartaoCredito;
              tpIntegra:=tiPagNaoIntegrado;
-          end;
+          end;}
 
           if dtlmodalidade.AsInteger = mdaConvenio then
             tPag := fpCreditoLoja;
 
           if dtlmodalidade.AsInteger = mdaDinheiro then
           begin
+
             vlTotalDinheiro := vlTotalDinheiro + dtldtlvalor.AsCurrency;
             tPag := fpDinheiro;
           end;
 
-          if dtlmodalidade.AsInteger = mdaPIX then
+         { if dtlmodalidade.AsInteger = mdaPIX then
           begin
             vlTotalPIX := vlTotalPIX + dtldtlvalor.AsCurrency;
             tPag := fpPagamentoInstantaneo;
             tpIntegra:=tiPagNaoIntegrado;
-          end;
+          end;}
 
           if dtlmodalidade.AsInteger = mdaOnline then
           begin
@@ -1743,8 +1756,10 @@ Begin
 
           vPag := vlPag;
         end;
+         end;
         dtl.Next;
       end;
+
 
      { if not consulta.IsEmpty then
       begin
@@ -1823,8 +1838,10 @@ Begin
       if (toettocodigo.AsInteger = ttoDevolucao) or (toettocodigo.AsInteger = ttoRemessaRetorno) or (toettocodigo.AsInteger = ttoOutros) or
         (toettocodigo.AsInteger = ttoComplemento) then
       begin
+
         with pag.add do
         begin
+
           tPag := fpSemPagamento;
           vPag := 0;
         end;
@@ -1849,13 +1866,20 @@ Begin
           while not dtl.Eof do
           begin
 
+                if (dtlmodalidade.AsInteger = mdaChequeTerceiros) or
+         (dtlmodalidade.AsInteger = mdaConvenio) or
+         (dtlmodalidade.AsInteger = mdaDinheiro) or
+         (dtlmodalidade.AsInteger = mdaOnline) then
+         begin
+
+
             with pag.add do
             begin
 
               if dtlmodalidade.AsInteger = mdaChequeTerceiros then
                 tPag := fpCheque;
 
-              if dtlmodalidade.AsInteger = mdaCartaoDebito then
+             { if dtlmodalidade.AsInteger = mdaCartaoDebito then
               begin
                 tPag := fpCartaoDebito;
                 tpIntegra:=tiPagNaoIntegrado;
@@ -1865,7 +1889,7 @@ Begin
               begin
                 tPag := fpCartaoCredito;
                 tpIntegra:=tiPagNaoIntegrado;
-              end;
+              end;}
 
               if dtlmodalidade.AsInteger = mdaConvenio then
                 tPag := fpCreditoLoja;
@@ -1876,12 +1900,12 @@ Begin
                 tPag := fpDinheiro;
               end;
 
-              if dtlmodalidade.AsInteger = mdaPIX then
+             { if dtlmodalidade.AsInteger = mdaPIX then
               begin
                 vlTotalPIX := vlTotalPIX + dtldtlvalor.AsCurrency;
                 tpIntegra:=tiPagNaoIntegrado;
                 tPag := fpPagamentoInstantaneo;
-              end;
+              end;}
 
               if dtlmodalidade.AsInteger = mdaOnLine then
               begin
@@ -1894,6 +1918,7 @@ Begin
 
               vPag := vlPag;
             end;
+         end;
             dtl.Next;
           end;
 
@@ -1901,7 +1926,7 @@ Begin
         else
         begin
 
-          with pag.add do
+        {  with pag.add do
           begin
 
             consulta.Close;
@@ -1911,12 +1936,332 @@ Begin
 
             tPag := fpDinheiro;
             vPag := consulta.FieldByName('produtos').AsFloat;
+          end;}
 
-          end;
         end;
       end;
 
     end;
+
+
+      dtl.First;
+      while not dtl.Eof do
+      begin
+
+        if (dtl.FieldByName('modalidade').AsInteger = mdaCartaoDebito) then
+        begin
+
+          rdc.Close;
+          rdc.Connection := zcone;
+          rdc.ParamByName('dtlchave').AsInteger := dtl.FieldByName('dtlchave')
+            .AsInteger;
+          rdc.Open;
+
+          with pag.add do
+          begin
+
+            tagPagamento.Close;
+            tagPagamento.Connection := zcone;
+            tagPagamento.ParamByName('mdacodigo').AsInteger := mdaCartaoDebito;
+            tagPagamento.Open;
+
+            tPag := StrToFormaPagamento(vlCodigoTagOK,
+              formatfloat('00', tagPagamento.FieldByName('mdatagpagamento')
+              .AsFloat));
+
+            if tagPagamento.FieldByName('mdatagpagamento').AsInteger = 99 then
+            begin
+              xPag := tagPagamento.FieldByName('mdadescrpagamento').AsString;
+            end;
+
+            vPag := rdc.FieldByName('rdcvalor').AsCurrency;
+            tpIntegra := tiPagNaoIntegrado;
+
+
+            if ((rdc.FieldByName('adccodigo').AsString <> '') and
+              (rdc.FieldByName('adccodigo').AsString <> '0')) and
+              (rdc.FieldByName('bdccodigo').AsInteger <> 99) then
+            begin
+
+              tpIntegra := tiPagIntegrado;
+
+              CNPJ := SoNumeros(rdc.FieldByName('etddoc1').AsString);
+              cAut := rdc.FieldByName('rdcnrauto').AsString;
+
+              CNPJReceb := SoNumeros(cfgetddoc1.AsString);
+              idTermPag := Acesso.Terminal.ToString;
+
+              case rdc.FieldByName('bdccodigo').AsInteger of
+                1:
+                  TBand := bcVisa;
+                2:
+                  TBand := bcMasterCard;
+                3:
+                  TBand := bcAmericanExpress;
+                4:
+                  TBand := bcSorocred;
+                5:
+                  TBand := bcDinersClub;
+                6:
+                  TBand := bcElo;
+                7:
+                  TBand := bcHipercard;
+                8:
+                  TBand := bcAura;
+                9:
+                  TBand := bcCabal;
+                10:
+                  TBand := bcAlelo;
+                11:
+                  TBand := bcBanesCard;
+                12:
+                  TBand := bcCalCard;
+                13:
+                  TBand := bcCredz;
+                14:
+                  TBand := bcDiscover;
+                15:
+                  TBand := bcGoodCard;
+                16:
+                  TBand := bcGreenCard;
+                17:
+                  TBand := bcHiper;
+                18:
+                  TBand := bcJcB;
+                19:
+                  TBand := bcMais;
+                20:
+                  TBand := bcMaxVan;
+                21:
+                  TBand := bcPolicard;
+                22:
+                  TBand := bcRedeCompras;
+                23:
+                  TBand := bcSodexo;
+                24:
+                  TBand := bcValeCard;
+                25:
+                  TBand := bcVerocheque;
+                26:
+                  TBand := bcVR;
+                27:
+                  TBand := bcTicket;
+                10014:
+                  TBand := bcDiscover;
+                20001:
+                  TBand := bcMasterCard;
+                20002:
+                  TBand := bcVisa;
+                20137:
+                  TBand := bcMasterCard;
+                99:
+                  TBand := bcOutros;
+              end;
+            end
+            else
+            begin
+               tpIntegra:=tiPagNaoIntegrado;
+            end;
+
+          end;
+
+        end;
+
+        if (dtl.FieldByName('modalidade').AsInteger = mdaCartaoCredito) then
+        begin
+
+          rdc.Close;
+          rdc.Connection := zcone;
+          rdc.ParamByName('dtlchave').AsInteger := dtl.FieldByName('dtlchave')
+            .AsInteger;
+          rdc.Open;
+
+
+          with pag.add do
+          begin
+            tagPagamento.Close;
+            tagPagamento.Connection := zcone;
+            tagPagamento.ParamByName('mdacodigo').AsInteger := mdaCartaoCredito;
+            tagPagamento.Open;
+
+            tPag := StrToFormaPagamento(vlCodigoTagOK,
+              formatfloat('00', tagPagamento.FieldByName('mdatagpagamento')
+              .AsFloat));
+
+            if tagPagamento.FieldByName('mdatagpagamento').AsInteger = 99 then
+            begin
+              xPag := tagPagamento.FieldByName('mdadescrpagamento').AsString;
+            end;
+
+            vPag := rdc.FieldByName('rdcvalor').AsCurrency;
+            tpIntegra := tiPagNaoIntegrado;
+
+            if ((rdc.FieldByName('adccodigo').AsString <> '') and
+              (rdc.FieldByName('adccodigo').AsString <> '0')) and
+              (rdc.FieldByName('bdccodigo').AsInteger <> 99) then
+
+            begin
+              tpIntegra := tiPagIntegrado;
+              CNPJ := SoNumeros(rdc.FieldByName('etddoc1').AsString);
+
+              CNPJReceb := SoNumeros(cfgetddoc1.AsString);
+              idTermPag := Acesso.Terminal.ToString;
+
+              case rdc.FieldByName('bdccodigo').AsInteger of
+                1:
+                  TBand := bcVisa;
+                2:
+                  TBand := bcMasterCard;
+                3:
+                  TBand := bcAmericanExpress;
+                4:
+                  TBand := bcSorocred;
+                5:
+                  TBand := bcDinersClub;
+                6:
+                  TBand := bcElo;
+                7:
+                  TBand := bcHipercard;
+                8:
+                  TBand := bcAura;
+                9:
+                  TBand := bcCabal;
+                10:
+                  TBand := bcAlelo;
+                11:
+                  TBand := bcBanesCard;
+                12:
+                  TBand := bcCalCard;
+                13:
+                  TBand := bcCredz;
+                14:
+                  TBand := bcDiscover;
+                15:
+                  TBand := bcGoodCard;
+                16:
+                  TBand := bcGreenCard;
+                17:
+                  TBand := bcHiper;
+                18:
+                  TBand := bcJcB;
+                19:
+                  TBand := bcMais;
+                20:
+                  TBand := bcMaxVan;
+                21:
+                  TBand := bcPolicard;
+                22:
+                  TBand := bcRedeCompras;
+                23:
+                  TBand := bcSodexo;
+                24:
+                  TBand := bcValeCard;
+                25:
+                  TBand := bcVerocheque;
+                26:
+                  TBand := bcVR;
+                27:
+                  TBand := bcTicket;
+                10014:
+                  TBand := bcDiscover;
+                20001:
+                  TBand := bcMasterCard;
+                20002:
+                  TBand := bcVisa;
+                20137:
+                  TBand := bcMasterCard;
+
+                99:
+                  TBand := bcOutros;
+              end;
+              cAut := rdc.FieldByName('rdcnrauto').AsString;
+            end
+            else
+            begin
+               tpIntegra:=tiPagNaoIntegrado;
+            end;
+
+          end;
+
+        end;
+
+        if (dtl.FieldByName('modalidade').AsInteger = mdaPIX) then
+        begin
+
+          rdc.Close;
+          rdc.Connection := zcone;
+          rdc.ParamByName('dtlchave').AsInteger := dtl.FieldByName('dtlchave')
+            .AsInteger;
+          rdc.Open;
+
+
+          with pag.add do
+          begin
+            tagPagamento.Close;
+            tagPagamento.Connection := zcone;
+            tagPagamento.ParamByName('mdacodigo').AsInteger := mdaPIX;
+            tagPagamento.Open;
+
+            tPag := StrToFormaPagamento(vlCodigoTagOK,
+              formatfloat('00', tagPagamento.FieldByName('mdatagpagamento')
+              .AsFloat));
+
+
+            if tagPagamento.FieldByName('mdatagpagamento').AsInteger = 99 then
+            begin
+              xPag := tagPagamento.FieldByName('mdadescrpagamento').AsString;
+            end;
+
+            vPag := rdc.FieldByName('rdcvalor').AsCurrency;
+            tpIntegra := tiPagNaoIntegrado;
+
+            if ((rdc.FieldByName('adccodigo').AsString <> '') and
+              (rdc.FieldByName('adccodigo').AsString <> '0')) and
+              (rdc.FieldByName('bdccodigo').AsInteger <> 99) then
+            begin
+              tpIntegra := tiPagIntegrado;
+
+              try
+                ctapix.Close;
+                ctapix.Connection := zcone;
+                ctapix.ParamByName('ctacodigo').AsInteger :=
+                  cfgcfgctacodigopix.AsInteger;
+                ctapix.Open;
+
+                if ctapix.FieldByName('ctacnpjbanco').AsString <> '' then
+                  CNPJ := SoNumeros(ctapix.FieldByName('ctacnpjbanco')
+                    .AsString);
+              except
+                CNPJ := SoNumeros(cfgetddoc1.AsString);
+              end;
+
+              CNPJReceb := SoNumeros(cfgetddoc1.AsString);
+
+              idTermPag := Acesso.Terminal.ToString;
+
+
+              cAut := rdc.FieldByName('rdcnrauto').AsString;
+            end
+            else
+            begin
+               tpIntegra:=tiPagNaoIntegrado;
+            end;
+
+          end;
+
+        end;
+
+        dtl.Next;
+
+      end;
+
+
+
+
+
+
+
+
 
     ide.cUF := cfgufscodigo.AsInteger;
     // Ide.cNF -> Código da NFe definido por último.
@@ -2709,19 +3054,17 @@ Begin
                   begin
 
                     vCST := Copy(self.itmcstcodigo.AsString, 2, 2);
-                    vlCSTIcms := StrToCSTICMS(vlCSTIcmsOK, vCST);
+                    vlCSTIcms := StrToCSTICMS( vCST);
 
-                    if vlCSTIcmsOK then
-                      CST := vlCSTIcms;
+                    CST := vlCSTIcms;
 
                   end
                   else
                   begin
 
-                    vlCSOSNIcms := StrToCSOSNIcms(vlCSOSNIcmsOK, vCST);
+                    vlCSOSNIcms := StrToCSOSNIcms( vCST);
 
-                    if vlCSOSNIcmsOK then
-                      CSOSN := vlCSOSNIcms
+                    CSOSN := vlCSOSNIcms
 
                   end;
                 end;
@@ -2733,18 +3076,17 @@ Begin
                   if (Copy(self.itmcstcodigo.AsString, 2, 2) = '60') then
                   begin
 
-                    vlCSTIcms := StrToCSTICMS(vlCSTIcmsOK, Copy(self.itmcstcodigo.AsString, 2, 2) + 'rep');
+                    vlCSTIcms := StrToCSTICMS( Copy(self.itmcstcodigo.AsString, 2, 2) + 'rep');
 
                   end
                   else
                   begin
                     vCST := Copy(self.itmcstcodigo.AsString, 2, 2);
 
-                    vlCSTIcms := StrToCSTICMS(vlCSTIcmsOK, vCST);
+                    vlCSTIcms := StrToCSTICMS( vCST);
 
                   end;
 
-                  if vlCSTIcmsOK then
                     CST := vlCSTIcms;
                 end;
 
@@ -2966,12 +3308,12 @@ Begin
 
             if itmcspcodigo.AsString = '' then
             begin
-              pis.CST := StrToCSTPIS(ok, formatfloat('00', 99));
+              pis.CST := StrToCSTPIS(formatfloat('00', 99));
             end
             else
             begin
 
-              pis.CST := StrToCSTPIS(ok, formatfloat('00', itmcspcodigo.AsInteger));
+              pis.CST := StrToCSTPIS( formatfloat('00', itmcspcodigo.AsInteger));
             end;
 
             if cfgcrtcodigo.AsInteger = 3 then // não é simples nem mei
@@ -2987,12 +3329,12 @@ Begin
             end;
             if itmcsfcodigo.AsString = '' then
             begin
-              COFINS.CST := StrToCSTCOFINS(ok, formatfloat('00', 99));
+              COFINS.CST := StrToCSTCOFINS( formatfloat('00', 99));
 
             end
             else
             begin
-              COFINS.CST := StrToCSTCOFINS(ok, formatfloat('00', itmcsfcodigo.AsInteger));
+              COFINS.CST := StrToCSTCOFINS( formatfloat('00', itmcsfcodigo.AsInteger));
             end;
             if cfgcrtcodigo.AsInteger = 3 then // não é simples nem mei
             begin
@@ -3019,48 +3361,6 @@ Begin
               if (nrt.RecordCount>0) {and (copy(mesmesprotocolo.asstring,1,6)<>'000000') and (copy(mesmesprotocolo.asstring,1,6)<>'')}  then
               begin
 
-                inr.close;
-                inr.ParamByName('itmchave').AsString:=itmitmchave.AsString;
-                inr.Open;
-
-                if inr.RecordCount>0 then
-                begin
-
-                  //  Informações do tributo: IBS / CBS
-
-                  IBSCBS.CST := StrToCSTIBSCBS(inr.FieldByName('cst_ibscbs').AsString);
-                  IBSCBS.cClassTrib :=inr.FieldByName('class_trib_ibscbs').AsString;
-                  IBSCBS.gIBSCBS.vBC :=inr.FieldByName('base_calc_ibscbs').AsCurrency;
-
-                  TotalIBSCBSgIBSCBSvBC:=SimpleRoundTo(TotalIBSCBSgIBSCBSvBC+IBSCBS.gIBSCBS.vBC,-2);
-
-
-                  // pAliqEfet=0,0600%×(1−0,40)=0,0600%×0,60
-                  IBSCBS.gIBSCBS.gIBSUF.pIBSUF :=inr.FieldByName('perc_ibs_uf').AsCurrency;
-                  IBSCBS.gIBSCBS.gIBSUF.gRed.pRedAliq :=inr.FieldByName('red_aliq_ibs_uf').AsCurrency;
-                  IBSCBS.gIBSCBS.gIBSUF.gRed.pAliqEfet :=inr.FieldByName('aliq_efetiva_ibs_uf').AsCurrency;
-                  IBSCBS.gIBSCBS.gIBSUF.vIBSUF :=inr.FieldByName('valor_ibs_uf').AsCurrency;
-                  TotalIBSCBSgIBSCBSgIBSUFvIBSUF:=SimpleRoundTo(TotalIBSCBSgIBSCBSgIBSUFvIBSUF+IBSCBS.gIBSCBS.gIBSUF.vIBSUF,-2);
-
-
-                  IBSCBS.gIBSCBS.gIBSMun.pIBSMun :=inr.FieldByName('perc_ibs_mun').AsCurrency;
-                  IBSCBS.gIBSCBS.gIBSMun.gRed.pRedAliq :=inr.FieldByName('red_aliq_ibs_mun').AsCurrency;
-                  IBSCBS.gIBSCBS.gIBSMun.gRed.pAliqEfet :=inr.FieldByName('aliq_efetiva_ibs_mun').AsCurrency;
-                  IBSCBS.gIBSCBS.gIBSMun.vIBSMun :=inr.FieldByName('valor_ibs_mun').AsCurrency;
-                  TotalIBSCBSgIBSCBSgIBSMunvIBSMun:=SimpleRoundTo(TotalIBSCBSgIBSCBSgIBSMunvIBSMun+IBSCBS.gIBSCBS.gIBSMun.vIBSMun,-2);
-
-                  IBSCBS.gIBSCBS.gCBS.pCBS :=inr.FieldByName('perc_cbs').AsCurrency;
-                  IBSCBS.gIBSCBS.gCBS.gRed.pRedAliq :=inr.FieldByName('red_aliq_cbs').AsCurrency;
-                  IBSCBS.gIBSCBS.gCBS.gRed.pAliqEfet :=inr.FieldByName('aliq_efetiva_cbs').AsCurrency;
-                  IBSCBS.gIBSCBS.gCBS.vCBS :=inr.FieldByName('valor_cbs').AsCurrency;
-
-                  TotalIBSCBSgIBSCBSgCBSvCBS:=SimpleRoundTo(TotalIBSCBSgIBSCBSgCBSvCBS+IBSCBS.gIBSCBS.gCBS.vCBS,-2);
-
-                  IBSCBS.gIBSCBS.vIBS := inr.FieldByName('total_ibs_ufmun').AsCurrency;
-
-                end
-                else
-                begin
 
 
                   //  Informações do tributo: IBS / CBS
@@ -3154,7 +3454,6 @@ Begin
                   inr.FieldByName('total_ibs_ufmun').AsCurrency:=IBSCBS.gIBSCBS.vIBS;
                   inr.Post;
 
-                end;
               end;
 
             end;
@@ -3178,12 +3477,12 @@ Begin
               ipi.vBC := itmitmbipi.AsCurrency;
               ipi.pIPI := self.itmitmaliqipi.AsFloat;
 
-              ipi.CST := StrToCSTIPI(ok, itmcsicodigo.AsString);
+              ipi.CST := StrToCSTIPI(okIPI, itmcsicodigo.AsString);
               vtipi := vtipi + ipi.vIPI;
             End
             Else
             Begin
-              ipi.CST := StrToCSTIPI(ok, itmcsicodigo.AsString);
+              ipi.CST := StrToCSTIPI(okIPI, itmcsicodigo.AsString);
 
               if toettocodigo.AsInteger=ttoDevolucao then
               begin
@@ -3681,27 +3980,6 @@ Begin
     End;
     { end; }
 
-
-    dtl.First;
-    while not dtl.Eof do
-    begin
-
-      rdc.close;
-      rdc.ParamByName('dtlchave').AsInteger:=dtl.FieldByName('dtlchave').AsInteger;
-      rdc.Open;
-
-      if not rdc.IsEmpty then
-      begin
-        if pos('{',rdc.FieldByName('rdcnrauto').AsString)=0 then
-        begin
-          vInfComplTEF:=vInfComplTEF+#13+'; Cód. Transação TEF: '+rdc.FieldByName('rdcnrauto').AsString;
-        end;
-      end;
-
-      dtl.Next;
-    end;
-
-    vInfComplGeral:=vInfComplGeral+#13+vInfComplTEF;
 
 
     (* Trata mensagem referente Carga Tributária *)
@@ -5797,7 +6075,7 @@ Begin
 
   If not FileExists(vpArquivoNFe) Then
   Begin
-    if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (pos('c:\',cfgcfgservarqnfes.AsString)=0) then
+    if (cfgcfgservarqnfes.AsString <> '127.0.0.1') then
     begin
 
 
@@ -7160,7 +7438,7 @@ Begin
 
   If ACBrNFeNotas.DANFE <> Nil Then
   Begin
-    ACBrNFeNotas.DANFE.TipoDANFE := StrToTpImp(ok, IntToStr(Ini.ReadInteger('Mizio', 'DANFE', 1)));
+    ACBrNFeNotas.DANFE.TipoDANFE := StrToTpImp( IntToStr(Ini.ReadInteger('Mizio', 'DANFE', 1)));
 
     If FileExists(ExtractFilePath(Application.ExeName) + 'logonfe.jpg') Then
     Begin
