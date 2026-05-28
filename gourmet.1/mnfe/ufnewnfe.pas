@@ -1531,6 +1531,23 @@ Begin
     ****** Verifica Pré-existência da NFe *******
     *
   *)
+  // [#9-cert] Validação proativa do certificado digital: bloqueia a emissão se estiver vencido,
+  // antes de numerar/assinar/enviar. Falha ao LER a validade não bloqueia (apenas registra em log),
+  // para não impedir a emissão por um problema na própria checagem.
+  try
+    ACBrNFeNotas.SSL.CarregarCertificadoSeNecessario;
+    if (ACBrNFeNotas.SSL.CertDataVenc > 0) and (ACBrNFeNotas.SSL.CertDataVenc < Now) then
+    begin
+      showmessage('100093 - Certificado digital VENCIDO em ' +
+        FormatDateTime('dd/mm/yyyy', ACBrNFeNotas.SSL.CertDataVenc) +
+        '. Renove o certificado antes de emitir a NF-e.');
+      exit;
+    end;
+  except
+    on E: Exception do
+      SalvarLogErro('Falha ao validar vencimento do certificado: ' + E.Message, E.StackTrace);
+  end;
+
   if validatemprodutos = False then
   begin
     showmessage(' 44456454 - Não é permitido emissão de nota com apenas SERVIÇOS e sem MERCADORIAS!');
@@ -3396,6 +3413,13 @@ Begin
 
                   //  Informações do tributo: IBS / CBS
 
+                  // [#10] Visibilidade (não bloqueante): registra em log quando o CST IBS/CBS não
+                  // está cadastrado para o item, evitando IBS/CBS incorreto silencioso. Regras da
+                  // Reforma Tributária ainda em transição — não bloqueamos a emissão.
+                  if Trim(nrtnrtcstibscbs.AsString) = '' then
+                    SalvarLogErro('IBS/CBS: CST nao cadastrado para o produto ' + Prod.cProd +
+                      ' - ' + Prod.xProd + ' (nrt ' + nrtnrtcodigo.AsString + ')', '');
+
                   IBSCBS.CST :=  StrToCSTIBSCBS(nrtnrtcstibscbs.AsString); // TCSTIBSCBS.cst000;
                   IBSCBS.cClassTrib := nrtnrtcodigo.AsString;
                   IBSCBS.gIBSCBS.vBC :=SimpleRoundTo( ((Prod.vProd+itmitmfrete.AsCurrency)-(COFINS.vCOFINS+pis.vPIS+ICMS.vICMS)   ),-2);  // total do item
@@ -3920,6 +3944,14 @@ Begin
           if Length(SomenteNumeros(CFOP)) <> 4 then
             vlErrosFiscais.Add('Item ' + IntToStr(i + 1) + ' (' + cProd + ' - ' + xProd +
               '): CFOP inv'#225'lido [' + CFOP + '] - deve ter 4 d'#237'gitos.');
+          // [#5] Validação de dados do produto (descrição e valor).
+          if Trim(xProd) = '' then
+            vlErrosFiscais.Add('Item ' + IntToStr(i + 1) + ' (' + cProd +
+              '): descri'#231#227'o do produto vazia.');
+          if vProd <= 0 then
+            vlErrosFiscais.Add('Item ' + IntToStr(i + 1) + ' (' + cProd + ' - ' + xProd +
+              '): valor do produto inv'#225'lido [' + formatfloat('#,##0.00', vProd) +
+              '] - deve ser maior que zero.');
         end;
       end;
 
@@ -7475,7 +7507,7 @@ Begin
 
   Ini := TIniFile.Create(ExtractFilePath(Application.ExeName) + vlPrograma + 'erp.ini');
 
-  // Try
+  try // [#8] try/finally garante liberar o TIniFile
 
   if cfgcfgmodonfe.AsInteger = 2 then
     plmodonfe.Caption := 'Homologação'
@@ -7540,6 +7572,9 @@ Begin
   ACBrNFeNotas.Configuracoes.WebServices.ProxyUser := Ini.ReadString('Proxy', 'User', '');
   ACBrNFeNotas.Configuracoes.WebServices.ProxyPass := Ini.ReadString('Proxy', 'Pass', '');
 
+  // [#8] Timeout das WebServices (ms): evita travar a aplicação indefinidamente quando a SEFAZ não responde.
+  ACBrNFeNotas.Configuracoes.WebServices.TimeOut := 30000;
+
   If ACBrNFeNotas.DANFE <> Nil Then
   Begin
     ACBrNFeNotas.DANFE.TipoDANFE := StrToTpImp( IntToStr(Ini.ReadInteger('Mizio', 'DANFE', 1)));
@@ -7574,9 +7609,9 @@ Begin
 
   StreamMemo.Free;
 
-  // Finally
-  // Ini.Free;
-  // End;
+  finally
+    Ini.Free; // [#8] libera o TIniFile mesmo em caso de exceção
+  end;
 
 End;
 

@@ -37,16 +37,24 @@ Cada item será aplicado em `ufnewnfe.pas`/`ufnewnfce.pas`, nunca nos fontes de 
 | 2 — Crítica | ✅ **Aplicado** — Reconcilia `mesmestotal` × soma dos componentes (fórmula vNF NF-e 4.0), tolerância R$0,02, bloqueia antes de assinar/consumir número | #12 | `ufnewnfe.pas` ~3874, após montagem dos totais |
 | 3 — Crítica | ✅ **Aplicado** — `mesdatanfe` passa a usar sempre `ide.dEmi` (fonte única) nos 3 pontos de gravação; antes oscilava entre `vpDataAtual` e `DhRecbto` | #6 | `ufnewnfe.pas` 4359, 4595, 4657 |
 | 4 — Crítica | ✅ **Aplicado (NCM/CFOP)** — pré-valida formato de NCM (8 díg.) e CFOP (4 díg.) por item sobre `NFe.Det` já montado, lista todas as pendências numa mensagem e bloqueia antes de numerar/assinar. CST/CSOSN: ver nota | #4 | `ufnewnfe.pas` ~3906, após os totais |
-| 5 — Alta | Implementar `validaentidade`/`validatemprodutos` reais (endereço, descrição, valor) | #3 | métodos de validação + chamada no início de `ImprimeNFe` |
+| 5 — Alta | ✅ **Aplicado (produto)** — valida descrição não-vazia e valor > 0 por item (junto da pré-validação #4 sobre `NFe.Det`). Destinatário/endereço: ver nota | #3 | `ufnewnfe.pas` ~3940 |
 | 6 — Alta | ✅ **Aplicado** — Persiste `mescodigonota` (`ide.cNF`) já no UPDATE da nota pendente, garantindo reuso do código na reemissão | #5 | `ufnewnfe.pas` ~4334 |
 | 7 — Alta | ✅ **Aplicado (parcial)** — eliminados os 4 `try/except` vazios (agora registram via `SalvarLogErro`); motivo do erro persistido no log. Status de erro dedicado: ver nota | #7, #11 | `ufnewnfe.pas` 2552, 4338, 4658, 4720 |
-| 8 — Alta | `try/finally` para `set @disable_triggers`, `TIniFile`, `LoadPackage` e queries; timeout nas WebServices | #11 | blocos de banco/rede |
-| 9 — Alta | Validar vencimento do certificado antes de `Enviar`; padronizar A1/A3 | #10 | `LerConfiguracao`/envio |
-| 10 — Alta | Validar/registrar CST IBS/CBS e conferir recálculo vs. `mnr` | #2 | bloco IBS/CBS |
+| 8 — Alta | ✅ **Aplicado (principal)** — `TimeOut` das WebServices = 30s (anti-travamento) + `try/finally` liberando o `TIniFile` em `LerConfiguracao`. O `@disable_triggers` do fluxo de emissão já é seguro (UPDATE dentro de try/except). Demais blocos `@disable_triggers`/`LoadPackage`: ver nota | #11 | `ufnewnfe.pas` `LerConfiguracao` (TimeOut ~7543, try/finally 7478/7580) |
+| 9 — Alta | ✅ **Aplicado** — valida vencimento do certificado (`SSL.CertDataVenc`) no início do `ImprimeNFe`; bloqueia se vencido (`100093`), falha de leitura não bloqueia (só loga). A1/A3 via `NumeroSerie`+`Senha`+WinCrypt já cobertos; PFX-arquivo fica como melhoria | #10 | `ufnewnfe.pas` ~1534, início de `ImprimeNFe` |
+| 10 — Alta | ✅ **Aplicado (conservador)** — registra em log (não bloqueia) quando o CST IBS/CBS não está cadastrado para o item. Conferência recalculado × `mnr`: ver nota | #2 | `ufnewnfe.pas` ~3416, bloco IBS/CBS |
 
 ### Nota #7 — status de erro dedicado
 
 Avaliado e **deliberadamente adiado** o uso de um `temcodigo` próprio para "erro" (ex.: `3`). A guarda de numeração (#9) só reaproveita o número de notas cujo `temcodigo <> 3`; marcar uma nota que falhou como `3` faria a retentativa **puxar um número novo**, gerando **gap** na sequência (que exigiria inutilização). Como a nota já consome número na fase pendente, manter `temcodigo = 4` (pendente, reaproveitável) é o comportamento correto para retentativa. O motivo do erro passou a ser **persistido no log** (`SalvarLogErro`) em todos os caminhos. Um status de erro visível sem efeito na numeração exigiria uma coluna nova (`mes.mesmsgerro`) + ajuste da tela de pendentes — fica como item de produto, não de código.
+
+### Nota #5 — validação do destinatário
+
+`validaentidade`/`validatransporte` eram stubs (`Result := True`) **e não são chamados** em lugar nenhum; a validação de IE e CNPJ/CPF do destinatário já ocorre inline via `ACBrValidador`. Implementar+chamar uma validação rígida de endereço (rua/CEP/UF) foi **adiado** por risco de falso positivo (NF-e a consumidor não identificado, devolução, ajuste, etc., onde o endereço completo nem sempre se aplica). A validação de produto (descrição/valor), inequívoca, foi aplicada.
+
+### Nota #10 — IBS/CBS (Reforma Tributária)
+
+Por ser área nova e com regras em transição, a intervenção foi **mínima e não-bloqueante**: apenas log quando o CST IBS/CBS está ausente, para dar visibilidade a falhas de cadastro sem risco de barrar emissões válidas. A **conferência do recalculado contra a tabela `mnr`** (quando a nota é relida por já ter protocolo) e a validação de aliquotas/reduções foram **deixadas para revisão de domínio + testes em homologação** — alterar o cálculo IBS/CBS às cegas teria alto risco de quebra.
 
 ## Diferenciação visual aplicada (v1.0)
 
