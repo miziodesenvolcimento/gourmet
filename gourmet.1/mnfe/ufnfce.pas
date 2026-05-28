@@ -5308,7 +5308,11 @@ Begin
       end;
       }
 
-      if (self.mesmesnumero.AsString <> '') and (self.mesmesnumero.AsString <> '0') then
+      // So reaproveita o numero ja gravado quando o registro pertence a uma NFC-e (modelo 65).
+      // Se o numero veio do fluxo NF-e (modelo 55) ou de outro tipo, ignora e busca um novo
+      // numero na sequencia propria da NFC-e (cfgnumeronfce), evitando emitir NFC-e com a sequencia da NF-e.
+      if (self.mesmesnumero.AsString <> '') and (self.mesmesnumero.AsString <> '0')
+        and (mestdfcodigo.AsString = tdfNotaFiscalConsumidorEletronica) then
       begin
         vNumeroNFe := self.mesmesnumero.AsInteger
       end

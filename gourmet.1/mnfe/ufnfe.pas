@@ -4178,7 +4178,11 @@ Begin
       *
     *)
 
-    if (self.mesmesnumero.AsString <> '') and (self.mesmesnumero.AsString <> '0') and (mestemcodigo.AsInteger <> 3) then
+    // So reaproveita o numero ja gravado quando o registro pertence a uma NF-e (modelo 55).
+    // Se o numero veio do fluxo NFC-e (modelo 65) ou de outro tipo, ignora e busca um novo
+    // numero na sequencia propria da NF-e (cfgnumeronfe), evitando emitir NF-e com a sequencia do NFC-e.
+    if (self.mesmesnumero.AsString <> '') and (self.mesmesnumero.AsString <> '0') and (mestemcodigo.AsInteger <> 3)
+      and (mestdfcodigo.AsString = tdfNotaFiscalEletronica) then
       vNumeroNFe := self.mesmesnumero.AsInteger
     else
     begin
