@@ -2740,6 +2740,8 @@ Var
 
   (* Acumuladores - Totais NFCe *)
   vlQtdItens: Integer;
+  vlItemIdx: Integer; // [#4/#5] índice do loop de validação de itens
+  vlErrosFiscais: TStringList; // [#4/#5] pendências fiscais por item
 
   vlTotBC: double;
   vlTotICMS: double;
@@ -3574,6 +3576,12 @@ Begin
 
                   //  Informações do tributo: IBS / CBS
 
+                  // [#10] Visibilidade (não bloqueante): registra em log quando o CST IBS/CBS não
+                  // está cadastrado para o item, evitando IBS/CBS incorreto silencioso.
+                  if Trim(nrtnrtcstibscbs.AsString) = '' then
+                    SalvarLogErro('IBS/CBS: CST nao cadastrado para o produto ' + Prod.cProd +
+                      ' - ' + Prod.xProd + ' (nrt ' + nrtnrtcodigo.AsString + ')', '');
+
                   IBSCBS.CST :=  StrToCSTIBSCBS(nrtnrtcstibscbs.AsString); // TCSTIBSCBS.cst000;
                   IBSCBS.cClassTrib := nrtnrtcodigo.AsString;
                   IBSCBS.gIBSCBS.vBC :=SimpleRoundTo( ((Prod.vProd+itmitmfrete.AsCurrency)-(COFINS.vCOFINS+pis.vPIS+ICMS.vICMS)   ),-2);  // total do item
@@ -4022,6 +4030,41 @@ Begin
 
       Total.ICMSTot.vPIS := mesmespis.AsCurrency;
       Total.ICMSTot.vCOFINS := mesmescofins.AsCurrency;
+
+      // [#4/#5] Pré-validação dos itens montados (NFe.Det) antes de assinar/enviar:
+      // NCM (8 díg.), CFOP (4 díg.), descrição não-vazia e valor > 0. Lista tudo e bloqueia.
+      vlErrosFiscais := TStringList.Create;
+      try
+        for vlItemIdx := 0 to ACBrNFeNFCe.NotasFiscais.Items[0].NFe.Det.Count - 1 do
+        begin
+          with ACBrNFeNFCe.NotasFiscais.Items[0].NFe.Det.Items[vlItemIdx].Prod do
+          begin
+            if Length(SomenteNumeros(NCM)) <> 8 then
+              vlErrosFiscais.Add('Item ' + IntToStr(vlItemIdx + 1) + ' (' + cProd + ' - ' + xProd +
+                '): NCM inv'#225'lido [' + NCM + '] - deve ter 8 d'#237'gitos.');
+            if Length(SomenteNumeros(CFOP)) <> 4 then
+              vlErrosFiscais.Add('Item ' + IntToStr(vlItemIdx + 1) + ' (' + cProd + ' - ' + xProd +
+                '): CFOP inv'#225'lido [' + CFOP + '] - deve ter 4 d'#237'gitos.');
+            if Trim(xProd) = '' then
+              vlErrosFiscais.Add('Item ' + IntToStr(vlItemIdx + 1) + ' (' + cProd +
+                '): descri'#231#227'o do produto vazia.');
+            if vProd <= 0 then
+              vlErrosFiscais.Add('Item ' + IntToStr(vlItemIdx + 1) + ' (' + cProd + ' - ' + xProd +
+                '): valor do produto inv'#225'lido [' + formatfloat('#,##0.00', vProd) +
+                '] - deve ser maior que zero.');
+          end;
+        end;
+
+        if vlErrosFiscais.Count > 0 then
+        begin
+          showmessage('100092 - Pend'#234'ncias fiscais nos itens (corrija antes de emitir):' +
+            #13#10 + #13#10 + vlErrosFiscais.Text);
+          Result := False;
+          Exit;
+        end;
+      finally
+        vlErrosFiscais.Free;
+      end;
 
 
       qDtl.Close;
@@ -7096,8 +7139,27 @@ Begin
     ACBrNFeNFCe.Configuracoes.WebServices.Ambiente := taProducao;
   end;
 
+  // [#8] Timeout das WebServices (ms): evita travar a aplicação quando a SEFAZ não responde.
+  ACBrNFeNFCe.Configuracoes.WebServices.TimeOut := 30000;
+
   ACBrNFeNFCe.Configuracoes.WebServices.TimeZoneConf.ModoDeteccao := tzManual;
   ACBrNFeNFCe.Configuracoes.WebServices.TimeZoneConf.TimeZoneStr := '-04:00';
+
+  // [#9-cert] Valida vencimento do certificado digital. Bloqueia a emissão se vencido (Result=False).
+  // Falha ao LER a validade não bloqueia (apenas registra em log), para não impedir emissão por erro na checagem.
+  try
+    ACBrNFeNFCe.SSL.CarregarCertificadoSeNecessario;
+    if (ACBrNFeNFCe.SSL.CertDataVenc > 0) and (ACBrNFeNFCe.SSL.CertDataVenc < Now) then
+    begin
+      showmessage('100093 - Certificado digital VENCIDO em ' +
+        FormatDateTime('dd/mm/yyyy', ACBrNFeNFCe.SSL.CertDataVenc) +
+        '. Renove o certificado antes de emitir a NFC-e.');
+      Result := False;
+    end;
+  except
+    on E: Exception do
+      SalvarLogErro('Falha ao validar vencimento do certificado: ' + E.Message, E.StackTrace);
+  end;
 
 End;
 
