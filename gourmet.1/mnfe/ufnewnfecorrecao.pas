@@ -13,6 +13,7 @@ type
     pbotoes: TPanel;
     bconfirma: TBitBtn;
     bcancela: TBitBtn;
+    pnlIdent: TPanel;
     procedure bconfirmaClick(Sender: TObject);
     procedure bcancelaClick(Sender: TObject);
   private
