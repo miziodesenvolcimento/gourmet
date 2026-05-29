@@ -599,6 +599,7 @@ Type
 
     function LerConfiguracao: Boolean;
     function PreparaCertificadoA1: string;
+    function BaixaXMLServidorSeguro(const AIP: String; const AArquivo: String): String;
 
   published
     property zcone: tuniconnection read Fzcone write Fzcone;
@@ -6094,7 +6095,7 @@ Begin
 
       end;
 
-      vpArquivoNFe := BaixaXMLServidor(IPServidorArquivos, vpArquivoNFe);
+      vpArquivoNFe := BaixaXMLServidorSeguro(IPServidorArquivos, vpArquivoNFe);
     end;
 
   End;
@@ -6338,7 +6339,7 @@ Begin
     Begin
       if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (pos('c:\',cfgcfgservarqnfes.AsString)=0) then
       begin
-        vpArquivoNFe := BaixaXMLServidor(IPServidorArquivos, vpArquivoNFe);
+        vpArquivoNFe := BaixaXMLServidorSeguro(IPServidorArquivos, vpArquivoNFe);
       end;
     End;
 
@@ -6467,7 +6468,7 @@ Begin
   Begin
     if (cfgcfgservarqnfes.AsString <> '127.0.0.1')  and (pos('c:\',cfgcfgservarqnfes.AsString)=0) then
     begin
-      vpArquivoNFe := BaixaXMLServidor(IPServidorArquivos, vpArquivoNFe);
+      vpArquivoNFe := BaixaXMLServidorSeguro(IPServidorArquivos, vpArquivoNFe);
     end;
 
   End;
@@ -6603,7 +6604,7 @@ Begin
   Begin
     if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (pos('c:\',cfgcfgservarqnfes.AsString)=0) then
     begin
-      vpArquivoNFe := BaixaXMLServidor(IPServidorArquivos, vpArquivoNFe);
+      vpArquivoNFe := BaixaXMLServidorSeguro(IPServidorArquivos, vpArquivoNFe);
     end;
 
   End;
@@ -6841,7 +6842,7 @@ begin
   Begin
     if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (pos('c:\',cfgcfgservarqnfes.AsString)=0) then
     begin
-       vpArquivoNFe := BaixaXMLServidor(IPServidorArquivos, vpArquivoNFe);
+       vpArquivoNFe := BaixaXMLServidorSeguro(IPServidorArquivos, vpArquivoNFe);
     end;
   End;
 
@@ -7039,7 +7040,7 @@ begin
 
       if not FileExists(vpArquivoNFe) then
       begin
-        vpArquivoNFe := BaixaXMLServidor(IPServidorArquivos, vpArquivoNFe);
+        vpArquivoNFe := BaixaXMLServidorSeguro(IPServidorArquivos, vpArquivoNFe);
 
       end;
 
@@ -7067,7 +7068,7 @@ begin
     Begin
       if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (pos('c:\',cfgcfgservarqnfes.AsString)=0)  then
       begin
-        vpArquivoXMLEvento := BaixaXMLServidor(IPServidorArquivos, vpArquivoXMLEvento);
+        vpArquivoXMLEvento := BaixaXMLServidorSeguro(IPServidorArquivos, vpArquivoXMLEvento);
       end;
     End;
 
@@ -7360,6 +7361,38 @@ begin
 
   Result := vlTipoVertical;
 
+end;
+
+function Tfnfe.BaixaXMLServidorSeguro(const AIP: String; const AArquivo: String): String;
+// Wrapper de BaixaXMLServidor (ufuncoes): intercepta falhas de conexao com o
+// servidor de XMLs e troca a mensagem tecnica (ex.: WinInet 12029) por um aviso
+// claro ao usuario. Erros que nao sejam de conectividade sao repassados.
+var
+  vlMsg: string;
+begin
+  try
+    Result := BaixaXMLServidor(AIP, AArquivo);
+  except
+    on E: Exception do
+    begin
+      vlMsg := LowerCase(E.Message);
+      if (Pos('12029', vlMsg) > 0) or   // nao foi possivel conectar ao servidor
+         (Pos('12007', vlMsg) > 0) or   // nome do servidor nao resolvido
+         (Pos('12002', vlMsg) > 0) or   // tempo limite excedido (timeout)
+         (Pos('12030', vlMsg) > 0) or   // conexao encerrada pelo servidor
+         (Pos('12031', vlMsg) > 0) or
+         (Pos('12152', vlMsg) > 0) or
+         (Pos('error sending data', vlMsg) > 0) or
+         (Pos('request failed', vlMsg) > 0) or
+         (Pos('estabelecida', vlMsg) > 0) then
+        raise Exception.Create(
+          '100620 - Não foi possível conectar ao servidor de XMLs da Mizio.' + sLineBreak +
+          'Verifique a conexão com a internet e tente novamente em instantes.' + sLineBreak +
+          'Se o problema persistir, entre em contato com o suporte.')
+      else
+        raise;
+    end;
+  end;
 end;
 
 function Tfnfe.PreparaCertificadoA1: string;
@@ -7835,7 +7868,7 @@ Begin
 
         if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (pos('c:\',cfgcfgservarqnfes.AsString)=0)  then
         begin
-        xml := BaixaXMLServidor(IPServidorArquivos, xml);
+        xml := BaixaXMLServidorSeguro(IPServidorArquivos, xml);
         end;
 
         End;
@@ -8001,7 +8034,7 @@ begin
     Begin
       if (cfgcfgservarqnfes.AsString <> '127.0.0.1')  and (pos('c:\',cfgcfgservarqnfes.AsString)=0) then
       begin
-        vpArquivoNFe := BaixaXMLServidor(IPServidorArquivos, vpArquivoNFe);
+        vpArquivoNFe := BaixaXMLServidorSeguro(IPServidorArquivos, vpArquivoNFe);
       end;
 
     End;
@@ -8017,7 +8050,7 @@ begin
     Begin
       if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (pos('c:\',cfgcfgservarqnfes.AsString)=0) then
       begin
-        vpArquivoXMLEvento := BaixaXMLServidor(IPServidorArquivos, vpArquivoXMLEvento);
+        vpArquivoXMLEvento := BaixaXMLServidorSeguro(IPServidorArquivos, vpArquivoXMLEvento);
       end;
 
     End;
