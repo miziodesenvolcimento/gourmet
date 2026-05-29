@@ -672,7 +672,6 @@ Var
   arq: String;
   vmeschave: String;
   ventcodigo: String;
-  vlArqXML: String;
   vrec, i: Integer;
   CurrentBookMark, CursorBookMark, FirstBookMark, LastBookMark: TBookmark;
 Begin
@@ -684,30 +683,6 @@ Begin
     'SELECT meschave, mesnumero , tdfcodigo from mes WHERE meschave=' +
     vmeschave;
   consulta.Open;
-
-  // Registro em contingencia (tem numero e temcodigo=4): valida se o XML esta
-  // disponivel antes de transmitir/imprimir (espelha ActReimprimirNFCEExecute).
-  if (Self.uqtabelamesnumero.AsString <> '0') and
-     (Self.uqtabelatemcodigo.AsString = '4') then
-  begin
-    vlArqXML := ExtractFilePath(Application.ExeName) + 'arqnfces\' +
-      '20' + Copy(Self.uqtabelameschavenfe.AsString, 3, 4) + '\' +
-      Self.uqtabelameschavenfe.AsString + '-nfe.xml';
-    if not FileExists(vlArqXML) then
-    begin
-      cfg.Close;
-      cfg.Params[0].AsInteger := Acesso.Filial;
-      cfg.Open;
-      if (cfgcfgservarqnfes.AsString <> '127.0.0.1') then
-        vlArqXML := BaixaXMLServidor(IPServidorArquivos, vlArqXML);
-    end;
-    if not FileExists(vlArqXML) then
-    begin
-      ShowMessage('100630 - Nao foi possivel localizar o XML da nota em ' +
-        'contingencia para impressao: ' + vlArqXML);
-      Exit;
-    end;
-  end;
 
   if (consulta.FieldByName('mesnumero').AsInteger = 0) or
     (consulta.FieldByName('tdfcodigo').AsString = '65') then

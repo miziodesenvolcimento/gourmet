@@ -1803,17 +1803,8 @@ begin
 
     if FileExists(vlArqNFCe) then
       Exit;
-
-    if ACBrNFeNFCe.Configuracoes.WebServices.Ambiente <> taHomologacao then
-    begin
-
-      if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (vlArqNFCe<>'')  then
-      begin
-        vlArqNFCe := BaixaXMLServidorSeguro(IPServidorArquivos, vlArqNFCe);
-        Exit;
-      end;
-
-    end;
+    // Nao busca no servidor aqui: primeiro tenta localmente os demais nomes
+    // (contingencia 2 e offline 9), pois tudo fica na mesma pasta arqnfces\AAAAMM.
 
 
     (* Tenta encontrar arquivo da NFCe com emissão em CONTINGÊNCIA - CÓD 2 *)
@@ -1832,17 +1823,8 @@ begin
 
     if FileExists(vlArqNFCe) then
       Exit;
-
-  if ACBrNFeNFCe.Configuracoes.WebServices.Ambiente <> taHomologacao then
-    begin
-
-      if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (vlArqNFCe<>'')  then
-      begin
-        vlArqNFCe := BaixaXMLServidorSeguro(IPServidorArquivos, vlArqNFCe);
-        Exit;
-      end;
-
-    end;
+    // Nao busca no servidor aqui: ainda falta tentar o nome de contingencia
+    // offline (9) localmente antes de recorrer ao servidor.
 
     (* Tenta encontrar arquivo da NFCe com emissão em CONTINGÊNCIA OFFLINE - CÓD 9 *)
     vlArqNFCe := copy(vlUfCod, 1, 2);
