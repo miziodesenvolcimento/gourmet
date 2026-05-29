@@ -458,6 +458,7 @@ type
 
     procedure VerifieAjustaICM;
     function LerConfiguracaoNFCe: Boolean;
+    function PreparaCertificadoA1: string;
     function validatemprodutos: Boolean;
     function DefineVertical: String;
     function CartaCorrecao(vChaveNFE: string; vFlaCodigo: string = '1'): Boolean;
@@ -7032,7 +7033,63 @@ begin
   end;
 end;
 
+function Tfnfce.PreparaCertificadoA1: string;
+// Garante que o certificado A1 esteja disponivel em disco (PFX) para consumo
+// pela ACBr. O certificado fica gravado no banco em cfgmnfe.cfgcertificadoa1
+// (blob). Se houver blob, regrava o arquivo a partir dele (assim um certificado
+// renovado no banco passa a valer sem intervencao manual); caso contrario
+// reaproveita um PFX valido ja existente. Retorna o caminho do PFX, ou ''
+// quando nao ha certificado A1 no banco (nesse caso usa-se o NumeroSerie).
+var
+  vlCaminhoPFX: string;
+  vlStream: TMemoryStream;
+begin
+  Result := '';
+  vlCaminhoPFX := ExtractFilePath(Application.ExeName) + 'certificado.pfx';
+
+  // 1) Ha blob do certificado no banco? Ele e a fonte da verdade: regrava o PFX.
+  if (not cfgcfgcertificadoa1.IsNull) and (cfgcfgcertificadoa1.BlobSize > 0) then
+  begin
+    vlStream := TMemoryStream.Create;
+    try
+      TBlobField(cfgcfgcertificadoa1).SaveToStream(vlStream);
+      if vlStream.Size > 0 then
+      begin
+        try
+          vlStream.SaveToFile(vlCaminhoPFX);
+        except
+          // Nao foi possivel gravar (ex.: pasta sem permissao). Deixa Result
+          // vazio para o chamador cair no fallback de NumeroSerie.
+          Exit;
+        end;
+      end;
+    finally
+      vlStream.Free;
+    end;
+  end;
+
+  // 2) Considera disponivel para consumo se o arquivo existe e nao esta vazio
+  //    (um PFX de 0 byte causaria "nao localiza/abre o certificado").
+  if FileExists(vlCaminhoPFX) then
+  begin
+    vlStream := TMemoryStream.Create;
+    try
+      try
+        vlStream.LoadFromFile(vlCaminhoPFX);
+      except
+        Exit;
+      end;
+      if vlStream.Size > 0 then
+        Result := vlCaminhoPFX;
+    finally
+      vlStream.Free;
+    end;
+  end;
+end;
+
 function Tfnfce.LerConfiguracaoNFCe: Boolean;
+var
+  vlCertPFX: string;
 Begin
 
   cfg.Close;
@@ -7048,18 +7105,18 @@ Begin
   ACBrNFeNFCe.Configuracoes.Geral.ModeloDF := moNFCe;
   ACBrNFeNFCe.Configuracoes.Geral.VersaoDF := ve400;
 
-  if (Length(cfgcfgsenhacertificadoa1.AsString) > 0) then
+  // Garante o certificado A1 disponivel para consumo: se o blob estiver no
+  // banco (cfgcertificadoa1), grava/atualiza o PFX em disco e usa via ArquivoPFX;
+  // senao, usa o certificado pelo numero de serie.
+  vlCertPFX := PreparaCertificadoA1;
+  if vlCertPFX <> '' then
   begin
-    ACBrNFeNFCe.Configuracoes.Certificados.Senha := cfgcfgsenhacertificadoa1.AsString;
-    cfgcfgcertificadoa1.SaveToFile(ExtractFilePath(application.ExeName) + 'certificado.pfx');
-
-    ACBrNFeNFCe.Configuracoes.Certificados.ArquivoPFX := ExtractFilePath(application.ExeName) + 'certificado.pfx';
-    // ACBrNFeNFCe.Configuracoes.Geral.SSLHttpLib := httpOpenSSL;
+    ACBrNFeNFCe.Configuracoes.Certificados.ArquivoPFX  := vlCertPFX;
     ACBrNFeNFCe.Configuracoes.Certificados.NumeroSerie := '';
-
   end
   else
   begin
+    ACBrNFeNFCe.Configuracoes.Certificados.ArquivoPFX  := '';
     ACBrNFeNFCe.Configuracoes.Certificados.NumeroSerie := Self.cfgcfgnumecertifa1.AsString;
   end;
 
