@@ -598,6 +598,7 @@ Type
     ACBrNFeDANFEFR: TACBrNFeDANFEFR;
 
     function LerConfiguracao: Boolean;
+    function PreparaCertificadoA1: string;
 
   published
     property zcone: tuniconnection read Fzcone write Fzcone;
@@ -7527,6 +7528,60 @@ begin
 
 end;
 
+function Tfnfe.PreparaCertificadoA1: string;
+// Garante que o certificado A1 esteja disponivel em disco (PFX) para consumo
+// pela ACBr. O certificado fica gravado no banco em cfgmnfe.cfgcertificadoa1
+// (blob). Se houver blob, regrava o arquivo a partir dele (assim um certificado
+// renovado no banco passa a valer sem intervencao manual); caso contrario
+// reaproveita um PFX valido ja existente. Retorna o caminho do PFX, ou ''
+// quando nao ha certificado A1 no banco (nesse caso usa-se o NumeroSerie).
+var
+  vlCaminhoPFX: string;
+  vlStream: TMemoryStream;
+begin
+  Result := '';
+  vlCaminhoPFX := ExtractFilePath(Application.ExeName) + 'certificado.pfx';
+
+  // 1) Ha blob do certificado no banco? Ele e a fonte da verdade: regrava o PFX.
+  if (not cfgcfgcertificadoa1.IsNull) and (cfgcfgcertificadoa1.BlobSize > 0) then
+  begin
+    vlStream := TMemoryStream.Create;
+    try
+      TBlobField(cfgcfgcertificadoa1).SaveToStream(vlStream);
+      if vlStream.Size > 0 then
+      begin
+        try
+          vlStream.SaveToFile(vlCaminhoPFX);
+        except
+          // Nao foi possivel gravar (ex.: pasta sem permissao). Deixa Result
+          // vazio para o chamador cair no fallback de NumeroSerie.
+          Exit;
+        end;
+      end;
+    finally
+      vlStream.Free;
+    end;
+  end;
+
+  // 2) Considera disponivel para consumo se o arquivo existe e nao esta vazio
+  //    (um PFX de 0 byte causaria "nao localiza/abre o certificado").
+  if FileExists(vlCaminhoPFX) then
+  begin
+    vlStream := TMemoryStream.Create;
+    try
+      try
+        vlStream.LoadFromFile(vlCaminhoPFX);
+      except
+        Exit;
+      end;
+      if vlStream.Size > 0 then
+        Result := vlCaminhoPFX;
+    finally
+      vlStream.Free;
+    end;
+  end;
+end;
+
 function Tfnfe.LerConfiguracao: Boolean;
 Var
   IniFile: String;
@@ -7534,6 +7589,7 @@ Var
   ok: Boolean;
   StreamMemo: TMemoryStream;
   vlPrograma: string;
+  vlCertPFX: string;
 Begin
   Result := True;
 
@@ -7580,12 +7636,30 @@ Begin
   ACBrNFeNotas.Configuracoes.Arquivos.PathSchemas := ExtractFilePath(Application.ExeName) + 'schemas';
   ACBrNFeNotas.Configuracoes.Arquivos.IniServicos := ExtractFilePath(Application.ExeName) + 'schemas\ACBrNFeServicos.ini';
 
-  ACBrNFeNotas.Configuracoes.Geral.SSLLib := libWinCrypt;
-  ACBrNFeNotas.Configuracoes.Geral.SSLCryptLib := cryWinCrypt;
-  ACBrNFeNotas.Configuracoes.Geral.SSLHttpLib := httpWinHttp;
-  ACBrNFeNotas.Configuracoes.Geral.SSLXmlSignLib := xsLibXml2;
+  // Garante o certificado A1 disponivel para consumo: se o blob estiver no
+  // banco (cfgcertificadoa1), grava/atualiza o PFX em disco e usa via ArquivoPFX;
+  // senao, mantem o consumo pelo certificado instalado na loja do Windows.
+  vlCertPFX := PreparaCertificadoA1;
+  if vlCertPFX <> '' then
+  begin
+    ACBrNFeNotas.Configuracoes.Geral.SSLLib        := libOpenSSL;
+    ACBrNFeNotas.Configuracoes.Geral.SSLCryptLib   := cryOpenSSL;
+    ACBrNFeNotas.Configuracoes.Geral.SSLHttpLib    := httpOpenSSL;
+    ACBrNFeNotas.Configuracoes.Geral.SSLXmlSignLib := xsLibXml2;
+    ACBrNFeNotas.SSL.SSLType := LT_TLSv1_2;
 
-  ACBrNFeNotas.Configuracoes.Certificados.NumeroSerie := self.cfgcfgnumecertif.AsString;
+    ACBrNFeNotas.Configuracoes.Certificados.ArquivoPFX  := vlCertPFX;
+    ACBrNFeNotas.Configuracoes.Certificados.NumeroSerie := '';
+  end
+  else
+  begin
+    ACBrNFeNotas.Configuracoes.Geral.SSLLib        := libWinCrypt;
+    ACBrNFeNotas.Configuracoes.Geral.SSLCryptLib   := cryWinCrypt;
+    ACBrNFeNotas.Configuracoes.Geral.SSLHttpLib    := httpWinHttp;
+    ACBrNFeNotas.Configuracoes.Geral.SSLXmlSignLib := xsLibXml2;
+
+    ACBrNFeNotas.Configuracoes.Certificados.NumeroSerie := self.cfgcfgnumecertif.AsString;
+  end;
   ACBrNFeNotas.Configuracoes.Certificados.Senha := cfgcfgsenhacertificadoa1.AsString;
 
   ACBrNFeNotas.Configuracoes.Geral.FormaEmissao := teNormal;
