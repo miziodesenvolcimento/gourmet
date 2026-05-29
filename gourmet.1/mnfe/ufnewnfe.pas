@@ -4858,8 +4858,10 @@ Var
   Retorno: String;
   vAnoMesNFe: String;
   arq: String;
+  vlChave: String;
 Begin
   Retorno := '';
+  vlChave := '';
 
   qconsulta.Close;
   qconsulta.SQL.Text := 'SELECT mesdatanfe, mesregistro, meschavenfe FROM mes WHERE meschave = ' + vmeschave + ' and flacodigo=' +
@@ -4868,14 +4870,16 @@ Begin
 
   If (self.qconsulta.RecordCount = 1) And (qconsulta.Fields[0].AsString <> '') Then
   Begin
+    vlChave := qconsulta.Fields[2].AsString;
     vAnoMesNFe := vPastaPrincipal + fnfe.vSubPastaDoc + '\' + formatdatetime('yyyymm', qconsulta.Fields[0].AsFloat);
-    arq := vAnoMesNFe + '\' + qconsulta.Fields[2].AsString + '-nfe.XML';
+    arq := vAnoMesNFe + '\' + vlChave + '-nfe.XML';
     Retorno := arq;
   End
   Else If (self.qconsulta.RecordCount = 1) And (qconsulta.Fields[1].AsString <> '') Then
   Begin
+    vlChave := qconsulta.Fields[2].AsString;
     vAnoMesNFe := vPastaPrincipal + fnfe.vSubPastaDoc + '\' + formatdatetime('yyyymm', qconsulta.Fields[1].AsFloat);
-    arq := vAnoMesNFe + '\' + qconsulta.Fields[2].AsString + '-nfe.XML';
+    arq := vAnoMesNFe + '\' + vlChave + '-nfe.XML';
     Retorno := arq;
   End;
 
@@ -4883,6 +4887,16 @@ Begin
     ForceDirectories(vAnoMesNFe);
 
   qconsulta.Close;
+
+  // Garante o XML disponivel para consumo (mesma regra da NFCe): se a nota ja
+  // esta autorizada (tem chave) e o XML NAO esta na pasta local arqnfes\AAAAMM,
+  // baixa do servidor. Notas sem chave ainda nao possuem XML -> nao tenta servidor.
+  if (Retorno <> '') and (vlChave <> '') and (not FileExists(Retorno)) then
+  begin
+    if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and
+       (pos('c:\', cfgcfgservarqnfes.AsString) = 0) then
+      Retorno := BaixaXMLServidorSeguro(IPServidorArquivos, Retorno);
+  end;
 
   Result := Retorno;
 End;

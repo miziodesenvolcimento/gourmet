@@ -11,8 +11,9 @@ uses
   ACBrMail, IdComponent, IdMessage, IdIOHandler, IdIOHandlerSocket,
   IdIOHandlerStack, IdSSL, IdSSLOpenSSL, IdBaseComponent, IdTCPConnection,
   IdTCPClient, IdExplicitTLSClientServerBase, IdMessageClient, IdSMTPBase,
+  Midaslib,
   IdSMTP, IdAttachment, IdAttachmentFile, ACBrDFeReport, ACBrDFeDANFeReport,
-  ACBrDANFCeFortesFr, ACBrDFeUtil, midaslib, ACBrDFeSSL, blcksock, IdEMailAddress,
+  ACBrDANFCeFortesFr, ACBrDFeUtil,  ACBrDFeSSL, blcksock, IdEMailAddress,
   System.JSON,ACBrDFe.Conversao, Vcl.Themes;
 
 type
@@ -231,7 +232,6 @@ type
     mostra: TProgressBar;
     cfgcfgtoesubstanpnoestado: TIntegerField;
     cfgcfgtoesubstanpforaestado: TIntegerField;
-    ACBrNFeDANFCEFR1: TACBrNFeDANFCEFR;
     cfgcfgtoemesinte: TIntegerField;
     mesmeshoranfe: TTimeField;
     cfgcfgdefinetoeatendimento: TIntegerField;
@@ -420,7 +420,12 @@ type
     procedure IO_OpenSSLStatusInfo(const AMsg: string);
   private
     Fzcone: TUniConnection;
+    FACBrNFeDANFCEFR1: TACBrNFeDANFCEFR;
     // ACBrNFeDANFEFR : TACBrNFeDANFEFR;
+
+    // Criado sob demanda (lazy) em runtime - ver GetACBrNFeDANFCEFR1.
+    function GetACBrNFeDANFCEFR1: TACBrNFeDANFCEFR;
+    property ACBrNFeDANFCEFR1: TACBrNFeDANFCEFR read GetACBrNFeDANFCEFR1;
 
     function AjustaSituacaoNFCe(vMesChave: string; vFlaCodigo: string = '1'; ASilent: Boolean = True): Boolean;
     procedure CancelaNFCe(vMesChave: string; vFlaCodigo: string = '1');
@@ -1727,141 +1732,124 @@ begin
   end;
 end;
 
+function Tfnfce.GetACBrNFeDANFCEFR1: TACBrNFeDANFCEFR;
+// Cria o componente de DANFE/impressao da NFCe sob demanda (lazy), em runtime,
+// em vez de mante-lo no DFM. Assim o FastReport (que carrega o midas.dll) so e
+// instanciado quando realmente se vai imprimir, contornando a falha de carga do
+// midas.dll ao abrir o form em ambiente de desenvolvimento.
+begin
+  if not Assigned(FACBrNFeDANFCEFR1) then
+  begin
+    FACBrNFeDANFCEFR1 := TACBrNFeDANFCEFR.Create(Self);
+
+    // Vincula ao componente NFCe (no DFM antigo era 'ACBrNFe = ACBrNFeNFCe').
+    ACBrNFeNFCe.DANFE := FACBrNFeDANFCEFR1;
+
+    // Propriedades que vinham do DFM e que afetam o layout do cupom.
+    // (Sistema, Impressora, FastFile, Logo etc. continuam sendo setados em
+    //  runtime nos pontos de impressao - nao replicar aqui.)
+    FACBrNFeDANFCEFR1.MargemSuperior := 0.8;
+    FACBrNFeDANFCEFR1.MargemInferior := 0.8;
+    FACBrNFeDANFCEFR1.MargemEsquerda := 0.6;
+    FACBrNFeDANFCEFR1.MargemDireita := 0.51;
+    FACBrNFeDANFCEFR1.ImprimeQRCodeLateral := True;
+    FACBrNFeDANFCEFR1.FormularioContinuo := True;
+  end;
+  Result := FACBrNFeDANFCEFR1;
+end;
+
 function Tfnfce.GeraNomeArqNFCe(vMesChave: string; vFlaCodigo: String = '1'): string;
 var
-  vlArqNFCe: String;
   vData: double;
   vlCNPJ: String;
   vlNrNFCe, vlNrSer, vlCodigoNFCe: Integer;
-
   vlUfCod: string;
+  vlPasta: string;
+  vlCandidatos: TStringList;
+  vlBaixado: string;
+  i: Integer;
+
+  function MontaNomeTipo(const ATipo: string): string;
+  var
+    s: string;
+  begin
+    s := copy(vlUfCod, 1, 2);
+    s := s + formatdatetime('yymm', vData);
+    s := s + vlCNPJ;
+    s := s + '65';
+    s := s + FormatFloat('000', vlNrSer);
+    s := s + FormatFloat('000000000', vlNrNFCe);
+    s := s + ATipo;
+    s := s + FormatFloat('00000000', vlCodigoNFCe);
+    s := s + Modulo11(trim(s));
+    Result := vlPasta + s + '-nfe.xml';
+  end;
 
 begin
-  vlArqNFCe := '';
+  Result := '';
 
+  mes.Close;
+  mes.Params[0].AsString := vMesChave;
+  mes.Params[1].AsString := vFlaCodigo;
+  mes.Open;
+
+  if mesmesnumero.AsInteger = 0 then
+    Exit;
+
+  if mesmesdatanfe.AsFloat = 0 then
+    vData := mesmesregistro.AsFloat
+  else
+    vData := mesmesdatanfe.AsFloat;
+
+  vlCNPJ := SomenteNumeros(Self.cfgetddoc1.AsString);
+  vlUfCod := copy(Self.cfgcddcodigo.AsString, 1, 2);
+  vlNrNFCe := mesmesnumero.AsInteger;
+  vlCodigoNFCe := mesmescodigonota.AsInteger;
+  if mesmesserie.AsString <> '' then
+    vlNrSer := mesmesserie.AsInteger
+  else
+    vlNrSer := 1;
+
+  vlPasta := vpPastaPrincipal + vpSubPastaDoc + '\' + formatdatetime('yyyymm', vData) + '\';
+
+  vlCandidatos := TStringList.Create;
   try
-
-
-      mes.Close;
-      mes.Params[0].AsString := vMesChave;
-      mes.Params[1].AsString := vFlaCodigo;
-      mes.Open;
-
-    if mesmesnumero.AsInteger = 0 then
-      Exit;
-
-    if mesmesdatanfe.AsFloat = 0 then
-      vData := mesmesregistro.AsFloat
-    else
-      vData := mesmesdatanfe.AsFloat;
-
+    // Nomes possiveis do XML, todos na pasta local arqnfces\AAAAMM:
+    // chave (se ja autorizada), normal(1), contingencia(2), contingencia offline(9).
     if mesmeschavenfe.AsString <> '' then
-    begin
-      vlArqNFCe := mesmeschavenfe.AsString;
-      vlArqNFCe := vpPastaPrincipal + vpSubPastaDoc + '\' + formatdatetime('yyyymm', vData) + '\' + vlArqNFCe + '-nfe.xml';
-    end;
+      vlCandidatos.Add(vlPasta + mesmeschavenfe.AsString + '-nfe.xml');
+    vlCandidatos.Add(MontaNomeTipo('1'));
+    vlCandidatos.Add(MontaNomeTipo('2'));
+    vlCandidatos.Add(MontaNomeTipo('9'));
 
-    if FileExists(vlArqNFCe) then
-      Exit;
-
-    if ACBrNFeNFCe.Configuracoes.WebServices.Ambiente <> taHomologacao then
-    begin
-
-      if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (vlArqNFCe<>'')  then
+    // 1) Procura o XML LOCALMENTE em todos os nomes. Se achar, usa e nao vai ao servidor.
+    for i := 0 to vlCandidatos.Count - 1 do
+      if FileExists(vlCandidatos[i]) then
       begin
-        vlArqNFCe := BaixaXMLServidorSeguro(IPServidorArquivos, vlArqNFCe);
+        Result := vlCandidatos[i];
         Exit;
       end;
 
-    end;
-
-    (* Tenta encontrar arquivo da NFCe com geração NORMAL *)
-    vlCNPJ := SomenteNumeros(Self.cfgetddoc1.AsString);
-    vlUfCod := copy(Self.cfgcddcodigo.AsString, 1, 2);
-
-    vlNrNFCe := mesmesnumero.AsInteger;
-    vlCodigoNFCe := mesmescodigonota.AsInteger;
-
-    if mesmesserie.AsString <> '' then
-      vlNrSer := mesmesserie.AsInteger
-    else
-      vlNrSer := 1;
-
-    vlCNPJ := SomenteNumeros(vlCNPJ);
-
-    // nome da nota com emissao normal
-    vlArqNFCe := copy(vlUfCod, 1, 2);
-    vlArqNFCe := vlArqNFCe + formatdatetime('yymm', vData);
-    vlArqNFCe := vlArqNFCe + vlCNPJ;
-    vlArqNFCe := vlArqNFCe + '65';
-    vlArqNFCe := vlArqNFCe + FormatFloat('000', vlNrSer);
-    vlArqNFCe := vlArqNFCe + FormatFloat('000000000', vlNrNFCe);
-    vlArqNFCe := vlArqNFCe + '1';
-    vlArqNFCe := vlArqNFCe + FormatFloat('00000000', vlCodigoNFCe);
-    vlArqNFCe := vlArqNFCe + Modulo11(trim(vlArqNFCe));
-    vlArqNFCe := vlArqNFCe + '-nfe.xml';
-
-    vlArqNFCe := vpPastaPrincipal + vpSubPastaDoc + '\' + formatdatetime('yyyymm', vData) + '\' + vlArqNFCe;
-
-    if FileExists(vlArqNFCe) then
-      Exit;
-    // Nao busca no servidor aqui: primeiro tenta localmente os demais nomes
-    // (contingencia 2 e offline 9), pois tudo fica na mesma pasta arqnfces\AAAAMM.
-
-
-    (* Tenta encontrar arquivo da NFCe com emissão em CONTINGÊNCIA - CÓD 2 *)
-    vlArqNFCe := copy(vlUfCod, 1, 2);
-    vlArqNFCe := vlArqNFCe + formatdatetime('yymm', vData);
-    vlArqNFCe := vlArqNFCe + vlCNPJ;
-    vlArqNFCe := vlArqNFCe + '65';
-    vlArqNFCe := vlArqNFCe + FormatFloat('000', vlNrSer);
-    vlArqNFCe := vlArqNFCe + FormatFloat('000000000', vlNrNFCe);
-    vlArqNFCe := vlArqNFCe + '2';
-    vlArqNFCe := vlArqNFCe + FormatFloat('00000000', vlCodigoNFCe);
-    vlArqNFCe := vlArqNFCe + Modulo11(trim(vlArqNFCe));
-    vlArqNFCe := vlArqNFCe + '-nfe.xml';
-
-    vlArqNFCe := vpPastaPrincipal + vpSubPastaDoc + '\' + formatdatetime('yyyymm', vData) + '\' + vlArqNFCe;
-
-    if FileExists(vlArqNFCe) then
-      Exit;
-    // Nao busca no servidor aqui: ainda falta tentar o nome de contingencia
-    // offline (9) localmente antes de recorrer ao servidor.
-
-    (* Tenta encontrar arquivo da NFCe com emissão em CONTINGÊNCIA OFFLINE - CÓD 9 *)
-    vlArqNFCe := copy(vlUfCod, 1, 2);
-    vlArqNFCe := vlArqNFCe + formatdatetime('yymm', vData);
-    vlArqNFCe := vlArqNFCe + vlCNPJ;
-    vlArqNFCe := vlArqNFCe + '65';
-    vlArqNFCe := vlArqNFCe + FormatFloat('000', vlNrSer);
-    vlArqNFCe := vlArqNFCe + FormatFloat('000000000', vlNrNFCe);
-    vlArqNFCe := vlArqNFCe + '9';
-    vlArqNFCe := vlArqNFCe + FormatFloat('00000000', vlCodigoNFCe);
-    vlArqNFCe := vlArqNFCe + Modulo11(trim(vlArqNFCe));
-    vlArqNFCe := vlArqNFCe + '-nfe.xml';
-
-    vlArqNFCe := vpPastaPrincipal + vpSubPastaDoc + '\' + formatdatetime('yyyymm', vData) + '\' + vlArqNFCe;
-
-    if FileExists(vlArqNFCe) then
-      Exit;
-
-  if ACBrNFeNFCe.Configuracoes.WebServices.Ambiente <> taHomologacao then
+    // 2) Nao esta na pasta local: baixa do servidor (tenta cada nome ate achar).
+    //    BaixaXMLServidor retorna '' quando o arquivo nao existe no servidor;
+    //    se o servidor estiver off, BaixaXMLServidorSeguro mostra mensagem clara.
+    if (ACBrNFeNFCe.Configuracoes.WebServices.Ambiente <> taHomologacao) and
+       (cfgcfgservarqnfes.AsString <> '127.0.0.1') then
     begin
-
-      if (cfgcfgservarqnfes.AsString <> '127.0.0.1') and (vlArqNFCe<>'')  then
+      for i := 0 to vlCandidatos.Count - 1 do
       begin
-        vlArqNFCe := BaixaXMLServidorSeguro(IPServidorArquivos, vlArqNFCe);
-        Exit;
+        vlBaixado := BaixaXMLServidorSeguro(IPServidorArquivos, vlCandidatos[i]);
+        if (vlBaixado <> '') and FileExists(vlBaixado) then
+        begin
+          Result := vlBaixado;
+          Exit;
+        end;
       end;
-
     end;
-
-    vlArqNFCe := '';
   finally
-    Result := vlArqNFCe;
+    vlCandidatos.Free;
   end;
 end;
-
 
 function Tfnfce.GeraNomeArqNFCeTipo(vMesChave: string; vTipoEmissao: Integer; vFlaCodigo: string = '1'): string;
 var
@@ -2337,7 +2325,8 @@ begin
   Self.Width := 520;
   Self.Height := 230;
 
-  ACBrNFeDANFCEFR1.Sistema := '(66)3544-2765 PÉGASUS Sistemas';
+  // Nao acessar ACBrNFeDANFCEFR1 aqui: criaria o componente (FastReport/midas)
+  // ja na abertura do form. O Sistema e definido no fluxo de impressao.
 
 
   // vDia :=fnfe.mesmesemissao.AsString; // hoje(Application, conexao);
